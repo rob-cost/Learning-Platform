@@ -3,6 +3,21 @@
 import os
 import sys
 
+from users.ai_question_generator import generate_difficulty_questions
+
+# Testing AI question generating with programming
+questions = generate_difficulty_questions('programming')
+
+print("=== GENERATED QUESTIONS ===")
+for i, q in enumerate(questions, 1):
+    print(f"\nQuestion {i}: {q.question}")
+    for j, option in enumerate(q.answer):
+        print(f"  {chr(65+j)}. {option}")  # A, B, C, D
+    print(f"  Correct: {chr(65+q.correct_answer)} | Level: {q.difficulty_level} | Points: {q.points}")
+
+print(f"\nTotal Questions: {len(questions)}")
+
+
 
 def main():
     """Run administrative tasks."""

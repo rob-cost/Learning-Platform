@@ -1,5 +1,8 @@
 from django import forms
 from .assessment_data import ASSESSMENT_QUESTIONS
+from .models import SUBJECT_CHOICES 
+
+
 
 class LearningStyleAssessmentForm (forms.Form):
     def __init__(self, *args, **kwargs):
@@ -34,3 +37,12 @@ class LearningStyleAssessmentForm (forms.Form):
             })
         
         return user_answers
+    
+class SubjectSelectionForm(forms.Form):
+    chosen_subject = forms.ChoiceField(
+        label="What would you like to learn?",
+        choices=SUBJECT_CHOICES,
+        widget=forms.RadioSelect,
+        required=True,
+        error_messages={'required': 'Please select a subject to continue.'}
+    )

@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+SUBJECT_CHOICES = [
+        ('programming', 'Programming and software development'),
+        ('music', 'Musical theory and composition'),
+        ('art', 'Art history and art crafting')
+    ]
+
+
 # Create your models here.
 class LearningProfile(models.Model):
 
@@ -8,12 +15,6 @@ class LearningProfile(models.Model):
         ('beginner', 'Beginner'),
         ('intermediate', 'Intermediate'),
         ('advanced', 'Advanced')
-    ]
-
-    SUBJECT_CHOICES = [
-        ('programming', 'Programming and software development'),
-        ('music', 'Musical theory and composition'),
-        ('art', 'Art history and art crafting')
     ]
 
     #user profile
@@ -25,13 +26,13 @@ class LearningProfile(models.Model):
     reading_learning_score = models.PositiveIntegerField(default=0)
 
     #choose a subject
-    choose_subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
+    chosen_subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)
 
     #assessment result
-    assessment_score = models.PositiveIntegerField(default=0)
+    assessment_score = models.PositiveIntegerField(default=0, help_text="from 0 to 100")
     difficulty_level = models.CharField(max_length=13, choices=DIFFICULTY_CHOICES, default='beginner')
-    assessment_completed = models.BooleanField(default=False)
-    assessment_date = models.DateTimeField(null=True, blank=True)
+    difficulty_assessment_completed = models.BooleanField(default=False)
+    difficulty_assessment_date = models.DateTimeField(null=True, blank=True)
 
     registration_step = models.IntegerField(default=1)
     registration_completed = models.BooleanField(default=False)
