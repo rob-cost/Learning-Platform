@@ -58,11 +58,9 @@ def generate_difficulty_questions(subject):
         )
         print("✅ Got response from Groq")
         raw_content = response.choices[0].message.content
-        print(f"📝 Raw response (first 200 chars): {raw_content[:200]}")
-        
         question_data = AssessmentQuestions.model_validate(json.loads(raw_content))
-        print(f"✅ Validation successful! Got {len(question_data.questions)} questions")
         return question_data.questions
+        
     
     except Exception as e:
         print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")

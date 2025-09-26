@@ -7,15 +7,14 @@ SUBJECT_CHOICES = [
         ('art', 'Art history and art crafting')
     ]
 
-
-# Create your models here.
-class LearningProfile(models.Model):
-
-    DIFFICULTY_CHOICES = [
+DIFFICULTY_CHOICES = [
         ('beginner', 'Beginner'),
         ('intermediate', 'Intermediate'),
         ('advanced', 'Advanced')
     ]
+
+# Create your models here.
+class LearningProfile(models.Model):
 
     #user profile
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -45,15 +44,20 @@ class LearningProfile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def get_learning_style_scores(self):
-        return {
-            'visual': self.visual_learning_score,
-            'hands_on': self.hands_on_learning_score,
-            'reading': self.reading_learning_score
-        }
 
     def __str__(self):
         return f"{self.user.username}'s learning profile"
     
 
     
+class DifficultyQuestions(models.Model):
+    subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES, help_text="topic's subject")
+    question_text = models.TextField(help_text="The question users will answer")
+    option_a = models.TextField()
+    option_b = models.TextField()
+    option_c = models.TextField()
+    option_d = models.TextField()
+    correct_answer = models.IntegerField(choices=[(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D')])
+    difficulty_level = models.CharField(max_length=40, choices=DIFFICULTY_CHOICES)
+    points = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from .assessment_data import ASSESSMENT_QUESTIONS
-from .forms import LearningStyleAssessmentForm, SubjectSelectionForm
+from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
-
 
 
 # user_answers = [
@@ -65,6 +64,7 @@ def learning_style_assessment_view(request):
     return render(request, 'assessment.html', {'form': form})
 
 def subject_selection_view(request):
+
     if request.method == 'POST':
         print('User completed the subject form')
 
@@ -88,22 +88,14 @@ def subject_selection_view(request):
 
     return render(request, 'subject_selection.html', {'form': form})
 
-# def generate_difficulty_assessment_questions(subject):
-    
-#     if subject == 'programming':
-#         prompt = """Generate 5 multiple choice questions to assess programming knowledge.
-#         Include: basic syntax, data structures, algorithms, debugging, and software design.
-#         Range from beginner to advanced concepts."""
-    
-#     elif subject == 'music':
-#         prompt = """Generate 5 multiple choice questions to assess music theory knowledge.
-#         Include: basic notation, scales, harmony, composition techniques, and music analysis.
-#         Range from beginner to advanced concepts."""
-    
-#     elif subject == 'art':
-#         prompt = """Generate 5 multiple choice questions to assess art knowledge.
-#         Include: art history periods, techniques, color theory, composition, and art analysis.
-#         Range from beginner to advanced concepts."""
-    
-#     return ai_generate_questions(prompt)
+def difficulty_assessment_view(request):
+    profile = request.user.learningpofile
+    chosen_subject = profile.chosen_subject
 
+    if request.method == "POST":
+        pass
+
+    else:
+        form = DifficultyAssessmentForm(subject = chosen_subject)
+
+    return render(request, 'difficulty_assessment.html', {'form': form})

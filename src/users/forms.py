@@ -1,8 +1,7 @@
 from django import forms
 from .assessment_data import ASSESSMENT_QUESTIONS
-from .models import SUBJECT_CHOICES 
-
-
+from .models import SUBJECT_CHOICES, LearningProfile
+from .ai_question_generator import generate_difficulty_questions
 
 class LearningStyleAssessmentForm (forms.Form):
     def __init__(self, *args, **kwargs):
@@ -38,6 +37,8 @@ class LearningStyleAssessmentForm (forms.Form):
         
         return user_answers
     
+
+
 class SubjectSelectionForm(forms.Form):
     chosen_subject = forms.ChoiceField(
         label="What would you like to learn?",
@@ -46,3 +47,29 @@ class SubjectSelectionForm(forms.Form):
         required=True,
         error_messages={'required': 'Please select a subject to continue.'}
     )
+
+class DifficultyAssessmentForm(forms.Form):
+    
+    def __init__(self, subject, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        questions_data = generate_difficulty_questions(subject)
+        i = 1
+    
+        for question in questions_data:
+            choices = []
+
+            for option_index, option in enumerate(question.answer):
+                choices.append((option_index, option))
+
+            field_name = f'question_{i}'
+            self.fields[field_name] =  forms.ChoiceField(
+                label = question.question,
+                choices = choices,
+                widget = forms.RadioSelect,
+                required = True,
+                error_messages={'required': f'Please answer question {field_name}.'}
+            )
+            i+=1
+        
+            
+            
