@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
 from .ai_question_generator import generate_difficulty_questions
+
 
 
 # user_answers = [
@@ -121,3 +124,16 @@ def difficulty_assessment_view(request):
 def test_generate_ai_questions(request):
     questions = generate_difficulty_questions('programming')
     return render(request, 'test_questions.html', {'questions': questions})
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            LearningProfile.objects.create(user = user)
+            login(request, user)
+            return redirect('learning_style_assessment')
+    else: 
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+        

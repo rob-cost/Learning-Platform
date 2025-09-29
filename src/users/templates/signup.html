@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sign Up</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .errorlist {
+        color: red;
+        list-style: none;
+        padding: 0;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sign Up</h1>
+
+    <form method="post">
+      {% csrf_token %} {{ form.as_p }}
+      <button type="submit">Create Account</button>
+    </form>
+
+    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+  </body>
+</html>

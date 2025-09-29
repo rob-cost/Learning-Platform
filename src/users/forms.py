@@ -37,8 +37,6 @@ class LearningStyleAssessmentForm (forms.Form):
         
         return user_answers
     
-
-
 class SubjectSelectionForm(forms.Form):
     chosen_subject = forms.ChoiceField(
         label="What would you like to learn?",
