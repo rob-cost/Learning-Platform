@@ -53,10 +53,7 @@ class LearningProfile(models.Model):
 class DifficultyQuestions(models.Model):
     subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES, help_text="topic's subject")
     question_text = models.TextField(help_text="The question users will answer")
-    option_a = models.TextField()
-    option_b = models.TextField()
-    option_c = models.TextField()
-    option_d = models.TextField()
+    answers = models.JSONField(help_text="options answers")
     correct_answer = models.IntegerField(choices=[(0, 'A'), (1, 'B'), (2, 'C'), (3, 'D')])
     difficulty_level = models.CharField(max_length=40, choices=DIFFICULTY_CHOICES)
     points = models.PositiveIntegerField()

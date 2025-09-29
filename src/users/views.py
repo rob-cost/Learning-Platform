@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
+from .ai_question_generator import generate_difficulty_questions
 
 
 # user_answers = [
@@ -57,6 +58,8 @@ def learning_style_assessment_view(request):
 
         else:
             print("Form has errors")
+
+        return redirect('subject_selection') 
     else:
         print('User is visitng for the first time')
 
@@ -82,6 +85,7 @@ def subject_selection_view(request):
                 print("User profile created")
             else:
                 print("User choose subject")
+            return redirect('difficulty_assessment') 
     
     else:
         form = SubjectSelectionForm()
@@ -89,13 +93,31 @@ def subject_selection_view(request):
     return render(request, 'subject_selection.html', {'form': form})
 
 def difficulty_assessment_view(request):
-    profile = request.user.learningpofile
+    profile = request.user.learningprofile
     chosen_subject = profile.chosen_subject
 
     if request.method == "POST":
-        pass
+        form = DifficultyAssessmentForm(subject = chosen_subject, data = request.POST)
+
+        if form.is_valid():
+            assessment_score = form.get_user_answers_with_correct()
+            profile = LearningProfile.objects.get(user = request.user)
+            profile.assessment_score = assessment_score
+            profile.difficulty_assessment_completed = True
+            if assessment_score > 80:
+                profile.difficulty_level = 'advanced'
+            elif assessment_score >50:
+                profile.difficulty_level = 'intermediate'
+            else:
+                profile.difficulty_level = 'beginner'
+            profile.save()
+            return redirect('') 
 
     else:
         form = DifficultyAssessmentForm(subject = chosen_subject)
 
     return render(request, 'difficulty_assessment.html', {'form': form})
+
+def test_generate_ai_questions(request):
+    questions = generate_difficulty_questions('programming')
+    return render(request, 'test_questions.html', {'questions': questions})

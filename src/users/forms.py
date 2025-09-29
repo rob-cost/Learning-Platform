@@ -69,7 +69,36 @@ class DifficultyAssessmentForm(forms.Form):
                 required = True,
                 error_messages={'required': f'Please answer question {field_name}.'}
             )
+            self.fields[f'correct_answer_{i}'] = forms.IntegerField(
+                widget = forms.HiddenInput(),
+                initial = question.correct_answer,
+            )
+            self.fields[f'points_{i}'] = forms.IntegerField(
+                widget = forms.HiddenInput(),
+                initial = question.points,
+            )
+
+
             i+=1
+
+
+    def get_user_answers_with_correct(self):
+        if not self.is_valid():
+            return None
         
+        score = 0
+        max_score = 0
+        for i in range(1,6):
+            user_answer = int(self.cleaned_data[f'question_{i}'])
+            correct_answer = int(self.cleaned_data[f'correct_answer_{i}'])
+            points = int(self.cleaned_data[f'points_{i}'])
+            max_score += points
+            if user_answer  == correct_answer:
+                score += points
+        
+        assessment_score = round((score*100)/max_score)
+        return assessment_score
+
+
             
             
