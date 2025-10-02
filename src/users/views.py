@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
@@ -51,6 +52,7 @@ def learning_style_assessment_view(request):
             profile.visual_learning_score = scores['visual']
             profile.hands_on_learning_score = scores['hands_on']
             profile.reading_learning_score = scores['reading']
+            profile.registration_step = 2
             profile.save()
 
             if created:
@@ -82,6 +84,7 @@ def subject_selection_view(request):
 
             profile, created = LearningProfile.objects.get_or_create(user=request.user)
             profile.chosen_subject = chosen_subject
+            profile.registration_step = 3
             profile.save()
 
             if created:
@@ -107,6 +110,7 @@ def difficulty_assessment_view(request):
             profile = LearningProfile.objects.get(user = request.user)
             profile.assessment_score = assessment_score
             profile.difficulty_assessment_completed = True
+            profile.registration_step = 4
             if assessment_score > 80:
                 profile.difficulty_level = 'advanced'
             elif assessment_score >50:
@@ -114,7 +118,7 @@ def difficulty_assessment_view(request):
             else:
                 profile.difficulty_level = 'beginner'
             profile.save()
-            return redirect('') 
+            return redirect('profile') 
 
     else:
         form = DifficultyAssessmentForm(subject = chosen_subject)
@@ -137,3 +141,31 @@ def signup_view(request):
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
         
+@login_required
+def landing_view(request):
+    try:
+        profile = request.user.learningprofile
+        step = profile.registration_step
+
+        if step == 1:
+            return redirect('learning_style_assessment')
+        if step == 2:
+            return redirect('subject_selection')
+        if step == 3:
+            return redirect('difficulty_assessment')
+        else:
+            return redirect('profile_page')
+    except LearningProfile.DoesNotExist:
+        LearningProfile.objects.create(user = request.user)
+        return redirect('learning_style_assessment')
+
+@login_required
+def profile_view(request):
+    profile = request.user.learningprofile
+
+    context = {
+        'profile' : profile,
+        'username' : request.user.username
+    }
+
+    return render(request, 'profile.html', context)
