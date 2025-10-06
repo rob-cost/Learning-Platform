@@ -40,10 +40,9 @@ def generate_difficulty_questions(subject):
             
         return pydantic_questions
     
-    elif questions_count > 0:
+    if 0 < questions_count < 5:
         DifficultyQuestions.objects.filter(subject = subject).delete()
     
-    else:
         subject_prompt = {
             'programming': """ Generate 5 multiple choice questions to assess programming knowledge level. 
             Include questions covering: basic syntax, variables, functions, loops, and problem-solving. 
@@ -95,5 +94,5 @@ def generate_difficulty_questions(subject):
         except Exception as e:
             print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
             return []
-            # possible fallbak questions can be added 
+            # possible fallbak questions can be added  
 

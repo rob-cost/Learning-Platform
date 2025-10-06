@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
@@ -6,6 +7,7 @@ from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
 from .ai_question_generator import generate_difficulty_questions
+from lessons.ai_topic_generator import generate_topic
 
 
 
@@ -34,6 +36,12 @@ def calculate_learning_score(user_answers):
     return scores
     
 def learning_style_assessment_view(request):
+
+    profile = request.user.learningprofile
+    if profile.registration_step != 1:
+        messages.error(request, "You already completed this step.")
+        return redirect('landing')
+
     if request.method == 'POST':
         print('User submitted the form')
 
@@ -56,7 +64,7 @@ def learning_style_assessment_view(request):
             profile.save()
 
             if created:
-                print("User accon created")
+                print("User account created")
             else:
                 print("Updated user account with scores")
 
@@ -72,6 +80,11 @@ def learning_style_assessment_view(request):
     return render(request, 'assessment.html', {'form': form})
 
 def subject_selection_view(request):
+
+    profile = request.user.learningprofile
+    if profile.registration_step != 2:
+        messages.error(request, "You already completed this step.")
+        return redirect('landing')
 
     if request.method == 'POST':
         print('User completed the subject form')
@@ -102,6 +115,10 @@ def difficulty_assessment_view(request):
     profile = request.user.learningprofile
     chosen_subject = profile.chosen_subject
 
+    if profile.registration_step != 3:
+        messages.error(request, "You already completed this step.")
+        return redirect('landing')
+
     if request.method == "POST":
         form = DifficultyAssessmentForm(subject = chosen_subject, data = request.POST)
 
@@ -118,7 +135,11 @@ def difficulty_assessment_view(request):
             else:
                 profile.difficulty_level = 'beginner'
             profile.save()
-            return redirect('profile') 
+
+            generate_topic(chosen_subject)
+
+            messages.success(request, "Well done you have completed the registration process!")
+            return redirect('profile_page') 
 
     else:
         form = DifficultyAssessmentForm(subject = chosen_subject)

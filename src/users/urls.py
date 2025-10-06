@@ -7,5 +7,5 @@ urlpatterns = [
     path('difficulty-assessment/', views.difficulty_assessment_view, name='difficulty_assessment'),
     path('signup/', views.signup_view, name='signup'),
     path('dashboard/', views.landing_view, name='landing'),
-    path('profile/', views.profile_view, name='profile')
+    path('profile/', views.profile_view, name='profile_page')
 ]

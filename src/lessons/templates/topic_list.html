@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Your Learning Path</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      .topic-card {
+        background: white;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .topic-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      .topic-number {
+        color: #4caf50;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .topic-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #333;
+      }
+      .topic-description {
+        color: #666;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
+      <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
+    </div>
+
+    {% if topics %} {% for topic in topics %}
+    <a href="" style="text-decoration: none; color: inherit">
+      <div class="topic-card">
+        <div class="topic-number">Topic {{ topic.order }}</div>
+        <div class="topic-title">{{ topic.topic_name }}</div>
+        <div class="topic-description">{{ topic.description }}</div>
+      </div>
+    </a>
+    {% endfor %} {% else %}
+    <p>No topics available yet. Please complete your assessment.</p>
+    {% endif %}
+  </body>
+</html>
