@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Your Learning Path</title>
+    <title>{{ topic.topic_name }}</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -16,7 +16,13 @@
         border-radius: 8px;
         margin-bottom: 30px;
       }
-      .topic-card {
+      .back-link {
+        color: #4caf50;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: inline-block;
+      }
+      .lesson-card {
         background: white;
         padding: 20px;
         margin-bottom: 15px;
@@ -25,53 +31,50 @@
         cursor: pointer;
         transition: transform 0.2s;
       }
-      .topic-card:hover {
+      .lesson-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
       }
-      .topic-number {
-        color: #4caf50;
+      .lesson-number {
+        color: #2196f3;
         font-weight: bold;
         font-size: 14px;
       }
-      .topic-title {
-        font-size: 20px;
+      .lesson-title {
+        font-size: 18px;
         font-weight: bold;
         margin: 10px 0;
         color: #333;
       }
-      .topic-description {
-        color: #666;
-        line-height: 1.6;
-      }
-      .back-link {
-        color: #4caf50;
-        text-decoration: none;
-        margin-bottom: 10px;
-        display: inline-block;
+      .lesson-duration {
+        color: #999;
+        font-size: 14px;
       }
     </style>
   </head>
   <body>
-    <a href="{% url 'profile_page' %}" class="back-link">← Go to Profile</a>
+    <a href="{% url 'topic_list' %}" class="back-link">← Back to Topics</a>
+
     <div class="header">
-      <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
-      <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
+      <h1>{{ topic.topic_name }}</h1>
+      <p>{{ topic.description }}</p>
     </div>
 
-    {% if topics %} {% for topic in topics %}
+    {% if lessons %} {% for lesson in lessons %}
     <a
-      href="{% url 'topic_detail' topic.id %}"
+      href="{% url 'lesson_detail' lesson.id %}"
       style="text-decoration: none; color: inherit"
     >
-      <div class="topic-card">
-        <div class="topic-number">Topic {{ topic.order }}</div>
-        <div class="topic-title">{{ topic.topic_name }}</div>
-        <div class="topic-description">{{ topic.description }}</div>
+      <div class="lesson-card">
+        <div class="lesson-number">Lesson {{ lesson.order }}</div>
+        <div class="lesson-title">{{ lesson.lesson_title }}</div>
+        <div class="lesson-duration">
+          {{ lesson.estimated_duration }} minutes
+        </div>
       </div>
     </a>
     {% endfor %} {% else %}
-    <p>No topics available yet. Please complete your assessment.</p>
+    <p>Generating lessons for this topic...</p>
     {% endif %}
   </body>
 </html>

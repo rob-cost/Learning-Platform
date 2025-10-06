@@ -9,5 +9,5 @@ django.setup()
 from lessons.ai_topic_generator import generate_topic
 
 # Test it
-generate_topic('art')
+generate_topic('programming')
 print("Topics generated successfully!")

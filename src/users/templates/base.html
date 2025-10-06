@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block title %}Learning Platform{% endblock %}</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      .navbar {
+        background: #333;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .navbar-brand {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+      }
+      .navbar-links {
+        display: flex;
+        gap: 20px;
+      }
+      .navbar-links a {
+        color: white;
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        transition: background 0.3s;
+      }
+      .navbar-links a:hover {
+        background: #555;
+      }
+      .content {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="{% url 'profile_page' %}" class="navbar-brand"
+        >Learning Platform</a
+      >
+      <div class="navbar-links">
+        <a href="{% url 'topic_list' %}">My Topics</a>
+        <a href="{% url 'profile_page' %}">Profile</a>
+        <a href="{% url 'logout' %}">Logout</a>
+      </div>
+    </nav>
+
+    <div class="content">{% block content %}{% endblock %}</div>
+  </body>
+</html>

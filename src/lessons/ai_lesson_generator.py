@@ -39,7 +39,7 @@ def generate_lessons(topic_name, subject, difficulty_level):
     lesson_count = Lesson.objects.filter(topic = top_obj).count()
     if lesson_count == 4:
          return 
-    if lesson_count > 0:
+    if lesson_count >= 0:
         Lesson.objects.filter(topic = top_obj).delete()
         prompt = f"""Create 4 comprehensive lessons for the topic: "{topic_name}" 
         
@@ -79,7 +79,7 @@ def generate_lessons(topic_name, subject, difficulty_level):
 
         try:
             response = client.chat.completions.create(
-                model="llama3-8b-8192",
+               model="openai/gpt-oss-20b",
                 messages=[
                     {"role": "system", "content": "You are an expert educational content creator who designs multi-modal learning experiences."},
                     {"role": "user", "content": prompt}

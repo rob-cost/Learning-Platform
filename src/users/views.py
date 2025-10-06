@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
+from lessons.models import Topic
 from .ai_question_generator import generate_difficulty_questions
 from lessons.ai_topic_generator import generate_topic
 
@@ -183,10 +184,18 @@ def landing_view(request):
 @login_required
 def profile_view(request):
     profile = request.user.learningprofile
+    chosen_subject = profile.chosen_subject
+    difficulty_level = profile.difficulty_level
+
+    topics = Topic.objects.filter(
+        subject = chosen_subject,
+        difficulty_level = difficulty_level
+    ).order_by('order')
 
     context = {
         'profile' : profile,
-        'username' : request.user.username
+        'username' : request.user.username,
+        'topics': topics,
     }
 
     return render(request, 'profile.html', context)

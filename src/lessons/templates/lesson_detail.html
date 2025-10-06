@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ lesson.lesson_title }}</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1000px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .back-link {
+        color: #4caf50;
+        text-decoration: none;
+        margin-bottom: 10px;
+        display: inline-block;
+      }
+      .lesson-header {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      .content-section {
+        background: white;
+        padding: 30px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        border-left: 4px solid;
+      }
+      .visual-section {
+        border-left-color: #2196f3;
+      }
+      .hands-on-section {
+        border-left-color: #ff9800;
+      }
+      .reading-section {
+        border-left-color: #4caf50;
+      }
+      .section-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+      }
+      .section-icon {
+        margin-right: 10px;
+        font-size: 24px;
+      }
+      .content-text {
+        line-height: 1.8;
+        color: #333;
+        white-space: pre-line;
+      }
+      .dominant-badge {
+        background: #4caf50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+      .completion-button {
+        background: #4caf50;
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="{% url 'topic_detail' topic.id %}" class="back-link"
+      >← Back to {{ topic.topic_name }}</a
+    >
+
+    <div class="lesson-header">
+      <h1>{{ lesson.lesson_title }}</h1>
+      <p>
+        <strong>Estimated Duration:</strong> {{ lesson.estimated_duration }}
+        minutes
+      </p>
+    </div>
+
+    <!-- Visual Content -->
+    <div class="content-section visual-section">
+      <div class="section-title">
+        <span class="section-icon">👁️</span>
+        Visual Learning {% if dominant_style == 'visual' %}
+        <span class="dominant-badge">Your Preferred Style</span>
+        {% endif %}
+      </div>
+      <div class="content-text">
+        {{ lesson.lesson_content.visual_learning }}
+      </div>
+    </div>
+
+    <!-- Hands-On Content -->
+    <div class="content-section hands-on-section">
+      <div class="section-title">
+        <span class="section-icon">✋</span>
+        Hands-On Practice {% if dominant_style == 'hands_on' %}
+        <span class="dominant-badge">Your Preferred Style</span>
+        {% endif %}
+      </div>
+      <div class="content-text">
+        {{ lesson.lesson_content.hands_on_learning }}
+      </div>
+    </div>
+
+    <!-- Reading Content -->
+    <div class="content-section reading-section">
+      <div class="section-title">
+        <span class="section-icon">📖</span>
+        Reading Material {% if dominant_style == 'reading' %}
+        <span class="dominant-badge">Your Preferred Style</span>
+        {% endif %}
+      </div>
+      <div class="content-text">
+        {{ lesson.lesson_content.reading_learning }}
+      </div>
+    </div>
+
+    <button class="completion-button" onclick="markComplete()">
+      Mark as Complete
+    </button>
+
+    <script>
+      function markComplete() {
+        alert("Lesson completion tracking coming soon!");
+        // You'll implement this later to update UserProgress
+      }
+    </script>
+  </body>
+</html>
