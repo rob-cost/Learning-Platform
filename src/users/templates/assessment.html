@@ -1,14 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Learning style assessment</title>
-  </head>
-  <body>
-    <h1>Learning style assessment</h1>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Style Assessment</title>
 
-    <form method="post">
-      {% csrf_token %} {{ form.as_p }}
-      <button type="submit">Submit Assessment</button>
-    </form>
+    <style>
+      :root {
+        --primary-color: #2ecc71;
+        --primary-hover: #27ae60;
+        --background: #f4f6f5;
+        --text-color: #333;
+        --border-color: #ddd;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        font-family: "Inter", Arial, sans-serif;
+        background-color: var(--background);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .container {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 40px 35px;
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--text-color);
+        font-size: 28px;
+        margin-bottom: 30px;
+        border-bottom: 3px solid var(--primary-color);
+        display: inline-block;
+        padding-bottom: 8px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      form p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      label {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 5px;
+        display: inline-block;
+      }
+
+      input[type="radio"],
+      input[type="checkbox"] {
+        margin-right: 8px;
+      }
+
+      select,
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        width: 96%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        font-size: 15px;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      select:focus,
+      input:focus,
+      textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        outline: none;
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Learning Style Assessment</h1>
+
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+
+        <button type="submit">Submit Assessment</button>
+      </form>
+    </div>
   </body>
 </html>

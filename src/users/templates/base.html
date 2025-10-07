@@ -1,64 +1,166 @@
+<!-- templates/base.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>{% block title %}Learning Platform{% endblock %}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Learnify{% endblock %}</title>
+
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+      :root {
+        --primary-color: #2ecc71;
+        --primary-hover: #27ae60;
+        --background: #f4f6f5;
+        --nav-bg: white;
+        --text-color: #333;
+        --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       }
+
       body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f5f5;
+        font-family: "Inter", Arial, sans-serif;
+        margin: 0;
+        background-color: var(--background);
       }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Navbar */
       .navbar {
-        background: #333;
-        color: white;
-        padding: 15px 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 15px 30px;
+        background: var(--nav-bg);
+        box-shadow: var(--shadow);
+        border-radius: 0 0 12px 12px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
       }
-      .navbar-brand {
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
-        text-decoration: none;
+
+      .navbar .brand {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-color);
       }
-      .navbar-links {
+
+      .navbar ul {
         display: flex;
-        gap: 20px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
       }
-      .navbar-links a {
-        color: white;
-        text-decoration: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        transition: background 0.3s;
+
+      .navbar ul li {
+        margin-left: 25px;
+        position: relative;
       }
-      .navbar-links a:hover {
-        background: #555;
+
+      .navbar ul li a {
+        font-weight: 500;
+        transition: color 0.2s;
       }
-      .content {
-        max-width: 1000px;
-        margin: 30px auto;
-        padding: 20px;
+
+      .navbar ul li a:hover,
+      .navbar ul li a.active {
+        color: var(--primary-color);
+      }
+
+      /* Dropdown */
+      .dropdown {
+        cursor: pointer;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 35px;
+        right: 0;
+        background: var(--nav-bg);
+        box-shadow: var(--shadow);
+        border-radius: 8px;
+        overflow: hidden;
+        min-width: 150px;
+      }
+
+      .dropdown-content a {
+        display: block;
+        padding: 10px 15px;
+        font-weight: 500;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .navbar {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .navbar ul {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .navbar ul li {
+          margin: 10px 0;
+        }
       }
     </style>
+
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
+    <!-- Navbar -->
     <nav class="navbar">
-      <a href="{% url 'profile_page' %}" class="navbar-brand"
-        >Learning Platform</a
-      >
-      <div class="navbar-links">
-        <a href="{% url 'topic_list' %}">My Topics</a>
-        <a href="{% url 'profile_page' %}">Profile</a>
-        <a href="{% url 'logout' %}">Logout</a>
-      </div>
+      <div class="brand">Learnify</div>
+      <ul>
+        <li>
+          <a
+            href="{% url 'profile_page' %}"
+            class="{% if request.path == '/profile/' %}active{% endif %}"
+            >Profile</a
+          >
+        </li>
+        <li>
+          <a
+            href="{% url 'learning_path' %}"
+            class="{% if request.path == '/learning-path/' %}active{% endif %}"
+            >Learning Path</a
+          >
+        </li>
+        <li>
+          <a
+            href="{% url 'topic_list' %}"
+            class="{% if request.path == '/topics/' %}active{% endif %}"
+            >Topics</a
+          >
+        </li>
+        <li class="dropdown">
+          <a>Account ▼</a>
+          <div class="dropdown-content">
+            <a href="{% url 'settings' %}">Settings</a>
+            <a href="{% url 'logout' %}">Logout</a>
+          </div>
+        </li>
+      </ul>
     </nav>
 
-    <div class="content">{% block content %}{% endblock %}</div>
+    <!-- Page Content -->
+    <div class="container">{% block content %}{% endblock %}</div>
+
+    {% block extra_js %}{% endblock %}
   </body>
 </html>

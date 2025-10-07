@@ -1,124 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Learning Profile</title>
+
     <style>
+      :root {
+        --primary-color: #2ecc71;
+        --primary-hover: #27ae60;
+        --background: #f4f6f5;
+        --text-color: #333;
+        --border-color: #e0e0e0;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      }
+
       body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 50px auto;
-        padding: 20px;
+        font-family: "Inter", Arial, sans-serif;
+        background-color: var(--background);
+        margin: 0;
+        padding: 40px 20px;
+        color: var(--text-color);
       }
-      .profile-section {
-        background: white;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+      h1 {
+        text-align: center;
+        color: var(--text-color);
+        font-size: 32px;
+        margin-bottom: 30px;
       }
-      h2 {
-        color: #333;
-        border-bottom: 2px solid #4caf50;
-        padding-bottom: 10px;
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
       }
+
       .messages {
         margin: 20px 0;
       }
+
       .alert {
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 4px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
       }
+
       .alert-success {
         background-color: #d4edda;
         color: #155724;
-        border: 1px solid #c3e6cb;
+        border-left: 4px solid #2ecc71;
       }
+
       .alert-error {
         background-color: #f8d7da;
         color: #721c24;
-        border: 1px solid #f5c6cb;
+        border-left: 4px solid #e74c3c;
       }
+
+      .profile-section {
+        background: white;
+        padding: 25px 30px;
+        margin: 25px 0;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        transition: all 0.2s ease;
+      }
+
+      .profile-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 8px;
+        color: var(--text-color);
+      }
+
+      p {
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      strong {
+        color: var(--primary-hover);
+      }
+
       .topic-card {
         background: white;
-        padding: 20px;
+        padding: 20px 25px;
         margin-bottom: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        transition: transform 0.2s;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        display: block;
       }
+
       .topic-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
       }
-      .topic-number {
-        color: #4caf50;
-        font-weight: bold;
-        font-size: 14px;
-      }
+
       .topic-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin: 10px 0;
-        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 8px;
       }
+
       .topic-description {
+        font-size: 14px;
         color: #666;
         line-height: 1.6;
       }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 26px;
+        }
+
+        .profile-section {
+          padding: 20px;
+        }
+
+        .topic-card {
+          padding: 18px;
+        }
+      }
     </style>
   </head>
+
   <body>
-    {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    <h1>Welcome, {{ username }}!</h1>
-
-    <div class="profile-section">
-      <h2>Your Learning Style</h2>
-      <p><strong>Visual:</strong> {{ profile.visual_learning_score }} points</p>
-      <p>
-        <strong>Hands-On:</strong> {{ profile.hands_on_learning_score }} points
-      </p>
-      <p>
-        <strong>Reading:</strong> {{ profile.reading_learning_score }} points
-      </p>
-    </div>
-
-    <div class="profile-section">
-      <h2>Your Subject</h2>
-      <p>{{ profile.get_chosen_subject_display }}</p>
-    </div>
-
-    <div class="profile-section">
-      <h2>Your Level</h2>
-      <p>
-        <strong>Difficulty:</strong> {{ profile.get_difficulty_level_display }}
-      </p>
-      <p><strong>Score:</strong> {{ profile.assessment_score }}%</p>
-    </div>
-
-    <div class="profile-section">
-      <h2>Your Personalized Lessons</h2>
-      {% if topics %} {% for topic in topics %}
-      <a
-        href="{% url 'topic_detail' topic.id %}"
-        style="text-decoration: none; color: inherit"
-      >
-        <div class="topic-card">
-          <div class="topic-title">{{ topic.topic_name }}</div>
-          <div class="topic-description">{{ topic.description }}</div>
-        </div>
-      </a>
-      {% endfor %} {% else %}
-      <p>No topics available yet. Please complete your assessment.</p>
+    <div class="container">
+      {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
       {% endif %}
+
+      <h1>Welcome, {{ username }}!</h1>
+
+      <div class="profile-section">
+        <h2>Your Learning Style</h2>
+        <p>
+          <strong>Visual:</strong> {{ profile.visual_learning_score }} points
+        </p>
+        <p>
+          <strong>Hands-On:</strong> {{ profile.hands_on_learning_score }}
+          points
+        </p>
+        <p>
+          <strong>Reading:</strong> {{ profile.reading_learning_score }} points
+        </p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Your Subject</h2>
+        <p>{{ profile.get_chosen_subject_display }}</p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Your Level</h2>
+        <p><strong>Difficulty:</strong> {{ profile.difficulty_level }}</p>
+        <p><strong>Score:</strong> {{ profile.assessment_score }}%</p>
+      </div>
+
+      <div class="profile-section">
+        <h2>Your Personalized Lessons</h2>
+        {% if topics %} {% for topic in topics %}
+        <a href="{% url 'topic_detail' topic.id %}">
+          <div class="topic-card">
+            <div class="topic-title">{{ topic.topic_name }}</div>
+            <div class="topic-description">{{ topic.description }}</div>
+          </div>
+        </a>
+        {% endfor %} {% else %}
+        <p>No topics available yet. Please complete your assessment.</p>
+        {% endif %}
+      </div>
     </div>
   </body>
 </html>

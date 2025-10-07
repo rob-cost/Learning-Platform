@@ -1,77 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Learning Path</title>
+
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 900px;
-        margin: 50px auto;
-        padding: 20px;
-        background-color: #f5f5f5;
+      :root {
+        --primary-color: #2ecc71;
+        --primary-hover: #27ae60;
+        --background: #f4f6f5;
+        --text-color: #333;
+        --subtext-color: #666;
+        --border-radius: 12px;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
       }
+
+      body {
+        font-family: "Inter", Arial, sans-serif;
+        background-color: var(--background);
+        margin: 0;
+        padding: 40px 20px;
+        color: var(--text-color);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
       .header {
         background: white;
-        padding: 20px;
-        border-radius: 8px;
+        padding: 25px 30px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
         margin-bottom: 30px;
       }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: 28px;
+        color: var(--text-color);
+      }
+
+      p {
+        margin: 5px 0;
+        font-size: 16px;
+      }
+
       .topic-card {
         background: white;
-        padding: 20px;
+        padding: 20px 25px;
         margin-bottom: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        transition: transform 0.2s;
+        border-radius: var(--border-radius);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
       }
+
       .topic-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
       }
+
       .topic-number {
-        color: #4caf50;
-        font-weight: bold;
+        color: var(--primary-color);
+        font-weight: 600;
         font-size: 14px;
       }
+
       .topic-title {
         font-size: 20px;
-        font-weight: bold;
-        margin: 10px 0;
-        color: #333;
+        font-weight: 600;
+        margin: 8px 0;
       }
+
       .topic-description {
-        color: #666;
+        color: var(--subtext-color);
         line-height: 1.6;
+        font-size: 14px;
       }
-      .back-link {
-        color: #4caf50;
-        text-decoration: none;
-        margin-bottom: 10px;
-        display: inline-block;
+
+      @media (max-width: 768px) {
+        body {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        .header {
+          padding: 20px;
+        }
+
+        .topic-card {
+          padding: 18px;
+        }
       }
     </style>
   </head>
-  <body>
-    <a href="{% url 'profile_page' %}" class="back-link">← Go to Profile</a>
-    <div class="header">
-      <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
-      <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
-    </div>
 
-    {% if topics %} {% for topic in topics %}
-    <a
-      href="{% url 'topic_detail' topic.id %}"
-      style="text-decoration: none; color: inherit"
-    >
-      <div class="topic-card">
-        <div class="topic-number">Topic {{ topic.order }}</div>
-        <div class="topic-title">{{ topic.topic_name }}</div>
-        <div class="topic-description">{{ topic.description }}</div>
+  <body>
+    <div class="container">
+      <a href="{% url 'profile_page' %}" class="back-link">← Go to Profile</a>
+
+      <div class="header">
+        <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
+        <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
       </div>
-    </a>
-    {% endfor %} {% else %}
-    <p>No topics available yet. Please complete your assessment.</p>
-    {% endif %}
+
+      {% if topics %} {% for topic in topics %}
+      <a href="{% url 'topic_detail' topic.id %}">
+        <div class="topic-card">
+          <div class="topic-number">Topic {{ topic.order }}</div>
+          <div class="topic-title">{{ topic.topic_name }}</div>
+          <div class="topic-description">{{ topic.description }}</div>
+        </div>
+      </a>
+      {% endfor %} {% else %}
+      <p>No topics available yet. Please complete your assessment.</p>
+      {% endif %}
+    </div>
   </body>
 </html>

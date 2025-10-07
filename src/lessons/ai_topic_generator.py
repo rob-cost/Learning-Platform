@@ -25,7 +25,7 @@ def generate_topic (subject):
 
     topic_count = Topic.objects.filter(subject = subject).count()
     if topic_count == 30:
-         return topic_data
+         return None
     
     if topic_count < 30 :
         Topic.objects.filter(subject = subject).delete()

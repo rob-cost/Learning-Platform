@@ -53,6 +53,9 @@ def generate_lessons(topic_name, subject, difficulty_level):
                     - Step-by-step visual breakdowns
                     - Conceptual illustrations
                     - Use clear headers and bullet points for visual scanning
+                    - Start with a clear overview diagram description
+                    - Include 3-4 visual examples or metaphors
+                    - Provide step-by-step visual breakdowns
 
                     2. HANDS_ON_CONTENT:
                     - Practical exercises and activities
@@ -70,7 +73,11 @@ def generate_lessons(topic_name, subject, difficulty_level):
 
                     Requirements:
                     - Each lesson must contain ALL three content types
+                    - Each content section should be at least 300-500 words
+                    - Provide comprehensive, detailed explanations with multiple examples
                     - Ensure logical progression across the 4 lessons
+                    - Include at least 3 concrete, real-world examples for each concept
+                    - Provide code snippets with detailed line-by-line explanations
                     - Make content appropriate for {difficulty_level} level
                     - Each lesson should take approximately from 20 to 50 minutes to complete
                     - Number lessons sequentially (order: 1, 2, 3, 4)
@@ -91,7 +98,7 @@ def generate_lessons(topic_name, subject, difficulty_level):
                         "schema": LessonCollection.model_json_schema()
                     }
                 },
-                temperature=0.7
+                temperature=0.8
             )
             raw_content = response.choices[0].message.content
             lessons_data = LessonCollection.model_validate(json.loads(raw_content))
