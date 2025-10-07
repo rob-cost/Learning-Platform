@@ -15,7 +15,7 @@ This platform creates customized learning experiences by:
 
 ### Intelligent Assessment System
 
-- **Learning Style Assessment**: 5-question evaluation to determine visual, hands-on, and reading preferences
+- **Learning Style Assessment**: questions evaluation to determine visual, hands-on, and reading preferences
 - **Subject Selection**: Choose from Programming, Music, or Art
 - **AI-Generated Difficulty Testing**: Dynamic questions created by Groq AI to assess knowledge level (beginner/intermediate/advanced)
 
@@ -36,7 +36,7 @@ This platform creates customized learning experiences by:
 
 - **Backend**: Django 5.0+
 - **Database**: SQLite (development) / PostgreSQL (production-ready)
-- **AI Integration**: Groq API (LLaMA models)
+- **AI Integration**: Groq API
 - **Data Validation**: Pydantic
 - **Authentication**: Django built-in auth system
 
