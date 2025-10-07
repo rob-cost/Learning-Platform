@@ -96,7 +96,7 @@ def generate_topic (subject):
 
         except Exception as e:
                 print(f"❌ Issue with AI topic generator: {type(e).__name__}: {e}")
-                return []
+                return None
 
 
 

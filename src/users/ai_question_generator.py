@@ -93,6 +93,5 @@ def generate_difficulty_questions(subject):
     
         except Exception as e:
             print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
-            return []
-            # possible fallbak questions can be added  
+            return None
 
