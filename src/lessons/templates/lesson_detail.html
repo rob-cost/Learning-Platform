@@ -170,7 +170,7 @@
           {% endif %}
         </div>
         <div class="content-text">
-          {{ lesson.lesson_content.visual_learning }}
+          {{ lesson.lesson_content.visual_content | safe }}
         </div>
       </div>
 
@@ -183,7 +183,7 @@
           {% endif %}
         </div>
         <div class="content-text">
-          {{ lesson.lesson_content.hands_on_learning }}
+          {{ lesson.lesson_content.hands_on_content | safe }}
         </div>
       </div>
 
@@ -196,7 +196,7 @@
           {% endif %}
         </div>
         <div class="content-text">
-          {{ lesson.lesson_content.reading_learning }}
+          {{ lesson.lesson_content.reading_content | safe }}
         </div>
       </div>
 

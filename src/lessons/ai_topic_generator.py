@@ -5,6 +5,7 @@ from typing import List
 import json
 from dotenv import load_dotenv
 from .models import Topic
+from utils import config
 
 load_dotenv()
 
@@ -47,7 +48,7 @@ def generate_topic (subject):
 
         try:
             response = client.chat.completions.create(
-                    model="openai/gpt-oss-20b",
+                    model=config.MODEL,
                     messages=[
                         {"role": "system", "content": "You are an expert educator creating topics for lessons."},
                         {

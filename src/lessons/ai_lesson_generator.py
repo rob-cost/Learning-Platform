@@ -5,6 +5,8 @@ from typing import List
 import json
 from dotenv import load_dotenv
 from .models import Lesson
+from utils import config
+import markdown2
 
 load_dotenv()
 
@@ -18,15 +20,27 @@ class LessonContent(BaseModel):
 class SingleLesson(BaseModel):
     lesson_title: str
     order: int
-    visual_content: str
-    hands_on_content: str
-    reading_content: str
+    visual_content: str     
+    hands_on_content: str   
+    reading_content: str    
     estimated_duration: int
 
 class LessonCollection(BaseModel):
     subject: str
     lessons: List[SingleLesson]
 
+def markdown_to_html(md_text: str) -> str:
+    return markdown2.markdown(
+         md_text, extras=[
+            "fenced-code-blocks",   # Properly render ```python ... ```
+            "tables",               # Render markdown tables
+            "strike",               # Support ~~strikethrough~~
+            "task_list",            # Render task lists [x]
+            "code-friendly",        # Don’t mess with inline code
+            "break-on-newline",     # Handle single newlines gracefully
+            "cuddled-lists",        # Avoid gaps between lists
+        ]
+    ) 
 
 def generate_lessons(topic_name, subject, difficulty_level):
 
@@ -81,12 +95,15 @@ def generate_lessons(topic_name, subject, difficulty_level):
                     - Make content appropriate for {difficulty_level} level
                     - Each lesson should take approximately from 20 to 50 minutes to complete
                     - Number lessons sequentially (order: 1, 2, 3, 4)
+                    - Use valid Markdown for headings, lists, bold, italics, and code blocks
+                    - Code blocks: wrap code in triple backticks ``` with language, do NOT escape newlines
+                    - Do NOT escape Markdown characters (no `\\n`, `\\` for backticks)
 
                     Provide clear, engaging content that works for different learning preferences."""
 
         try:
             response = client.chat.completions.create(
-               model="openai/gpt-oss-20b",
+               model=config.MODEL,
                 messages=[
                     {"role": "system", "content": "You are an expert educational content creator who designs multi-modal learning experiences."},
                     {"role": "user", "content": prompt}
@@ -102,13 +119,17 @@ def generate_lessons(topic_name, subject, difficulty_level):
             )
             raw_content = response.choices[0].message.content
             lessons_data = LessonCollection.model_validate(json.loads(raw_content))
+
             for lesson in lessons_data.lessons:
+                html_visual = markdown_to_html(lesson.visual_content)
+                html_hands_on = markdown_to_html(lesson.hands_on_content)
+                html_reading = markdown_to_html(lesson.reading_content)
                 Lesson.objects.create(
                     topic = top_obj,
                     lesson_title = lesson.lesson_title,
                     order = lesson.order,
                     estimated_duration = lesson.estimated_duration,
-                    lesson_content = {'visual_learning': lesson.visual_content, 'hands_on_learning': lesson.hands_on_content, 'reading_learning': lesson.reading_content}
+                    lesson_content = {'visual_content': html_visual, 'hands_on_content': html_hands_on, 'reading_content': html_reading}
                 )
             
         

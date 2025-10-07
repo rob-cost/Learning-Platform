@@ -17,22 +17,203 @@
 
       body {
         font-family: "Inter", Arial, sans-serif;
-        background-color: var(--background);
         margin: 0;
-        padding: 40px 20px;
         color: var(--text-color);
+        background: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80")
+          no-repeat center center fixed;
+        background-size: cover;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(244, 246, 245, 0.9);
+        z-index: -1;
+      }
+
+      /* NAVBAR */
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        padding: 15px 40px;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .navbar-logo {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .navbar-links {
+        display: flex;
+        gap: 25px;
+      }
+
+      .navbar-links a {
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .navbar-links a:hover {
+        color: var(--primary-hover);
+      }
+
+      /* HAMBURGER MENU */
+      .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+      }
+
+      .hamburger span {
+        height: 3px;
+        width: 25px;
+        background: var(--text-color);
+        margin: 4px 0;
+        transition: 0.3s;
+      }
+
+      /* DROPDOWN MENU (MOBILE) */
+      .dropdown {
+        display: none;
+        flex-direction: column;
+        background: white;
+        position: absolute;
+        top: 65px;
+        right: 40px;
+        box-shadow: var(--shadow);
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 9;
+      }
+
+      .dropdown a {
+        padding: 12px 20px;
+        text-decoration: none;
+        color: var(--text-color);
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+      }
+
+      .dropdown a:hover {
+        background: #f2f2f2;
+        color: var(--primary-hover);
+      }
+
+      .dropdown a:last-child {
+        border-bottom: none;
+      }
+
+      /* CONTAINER */
+      .container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 40px auto;
+        gap: 30px;
+        padding: 0 20px;
+      }
+
+      .sidebar {
+        flex: 1;
+        max-width: 320px;
+      }
+
+      .profile-section {
+        background: white;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        transition: all 0.2s ease;
+      }
+
+      .profile-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
       }
 
       h1 {
-        text-align: center;
-        color: var(--text-color);
-        font-size: 32px;
-        margin-bottom: 30px;
+        font-size: 28px;
+        margin-bottom: 15px;
       }
 
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 8px;
+      }
+
+      p {
+        margin: 8px 0;
+        line-height: 1.6;
+      }
+
+      strong {
+        color: var(--primary-hover);
+      }
+
+      .main-content {
+        flex: 2;
+      }
+
+      .topic-card {
+        background: white;
+        padding: 20px 25px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        display: block;
+      }
+
+      .topic-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+      }
+
+      .topic-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-color);
+      }
+
+      .topic-description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .retake-btn {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.3s ease;
+        margin-top: 10px;
+      }
+
+      .retake-btn:hover {
+        background: var(--primary-hover);
       }
 
       .messages {
@@ -59,142 +240,118 @@
         border-left: 4px solid #e74c3c;
       }
 
-      .profile-section {
-        background: white;
-        padding: 25px 30px;
-        margin: 25px 0;
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        transition: all 0.2s ease;
+      @media (max-width: 900px) {
+        .container {
+          flex-direction: column;
+        }
+        .sidebar {
+          max-width: 100%;
+        }
       }
 
-      .profile-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-      }
-
-      h2 {
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 15px;
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 8px;
-        color: var(--text-color);
-      }
-
-      p {
-        margin: 8px 0;
-        line-height: 1.6;
-      }
-
-      strong {
-        color: var(--primary-hover);
-      }
-
-      .topic-card {
-        background: white;
-        padding: 20px 25px;
-        margin-bottom: 15px;
-        border-radius: 12px;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-        transition: transform 0.2s, box-shadow 0.2s;
-        text-decoration: none;
-        display: block;
-      }
-
-      .topic-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
-      }
-
-      .topic-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 8px;
-      }
-
-      .topic-description {
-        font-size: 14px;
-        color: #666;
-        line-height: 1.6;
-      }
-
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      @media (max-width: 768px) {
-        body {
-          padding: 20px;
+      @media (max-width: 700px) {
+        .navbar-links {
+          display: none;
         }
 
-        h1 {
-          font-size: 26px;
-        }
-
-        .profile-section {
-          padding: 20px;
-        }
-
-        .topic-card {
-          padding: 18px;
+        .hamburger {
+          display: flex;
         }
       }
     </style>
   </head>
 
   <body>
+    <nav class="navbar">
+      <div class="navbar-logo">Learning-Platform ({{username}})</div>
+
+      <div class="navbar-links">
+        <a href="{% url 'profile_page' %}">Profile</a>
+        <!-- <a href="{% url 'topic_list' %}">Topics</a> -->
+        <a href="{% url 'login' %}">Logout</a>
+      </div>
+
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="dropdown" id="dropdown">
+        <a href="{% url 'profile_page' %}">Profile</a>
+        <!-- <a href="{% url 'topic_list' %}">Topics</a> -->
+        <a href="{% url 'login' %}">Logout</a>
+      </div>
+    </nav>
+
     <div class="container">
-      {% if messages %}
-      <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+      <div class="sidebar">
+        {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="profile-section">
+          <h2>Your Learning Style</h2>
+          <p>
+            <strong>Visual:</strong> {{ profile.visual_learning_score }} points
+          </p>
+          <p>
+            <strong>Hands-On:</strong> {{ profile.hands_on_learning_score }}
+            points
+          </p>
+          <p>
+            <strong>Reading:</strong> {{ profile.reading_learning_score }}
+            points
+          </p>
+        </div>
+
+        <div class="profile-section">
+          <h2>Your Subject</h2>
+          <p>{{ profile.get_chosen_subject_display }}</p>
+        </div>
+
+        <div class="profile-section">
+          <h2>Your Level</h2>
+          <p><strong>Difficulty:</strong> {{ profile.difficulty_level }}</p>
+          <p><strong>Score:</strong> {{ profile.assessment_score }}%</p>
+
+          <a href="{}" class="retake-btn">Retake Assessment</a>
+        </div>
       </div>
-      {% endif %}
 
-      <h1>Welcome, {{ username }}!</h1>
-
-      <div class="profile-section">
-        <h2>Your Learning Style</h2>
-        <p>
-          <strong>Visual:</strong> {{ profile.visual_learning_score }} points
-        </p>
-        <p>
-          <strong>Hands-On:</strong> {{ profile.hands_on_learning_score }}
-          points
-        </p>
-        <p>
-          <strong>Reading:</strong> {{ profile.reading_learning_score }} points
-        </p>
-      </div>
-
-      <div class="profile-section">
-        <h2>Your Subject</h2>
-        <p>{{ profile.get_chosen_subject_display }}</p>
-      </div>
-
-      <div class="profile-section">
-        <h2>Your Level</h2>
-        <p><strong>Difficulty:</strong> {{ profile.difficulty_level }}</p>
-        <p><strong>Score:</strong> {{ profile.assessment_score }}%</p>
-      </div>
-
-      <div class="profile-section">
-        <h2>Your Personalized Lessons</h2>
-        {% if topics %} {% for topic in topics %}
-        <a href="{% url 'topic_detail' topic.id %}">
-          <div class="topic-card">
+      <div class="main-content">
+        <div class="profile-section">
+          <h2>Your Personalized Lessons</h2>
+          {% if topics %} {% for topic in topics %}
+          <a href="{% url 'topic_detail' topic.id %}" class="topic-card">
             <div class="topic-title">{{ topic.topic_name }}</div>
             <div class="topic-description">{{ topic.description }}</div>
-          </div>
-        </a>
-        {% endfor %} {% else %}
-        <p>No topics available yet. Please complete your assessment.</p>
-        {% endif %}
+          </a>
+          {% endfor %} {% else %}
+          <p>No topics available yet. Please complete your assessment.</p>
+          {% endif %}
+        </div>
       </div>
     </div>
+
+    <script>
+      const hamburger = document.getElementById("hamburger");
+      const dropdown = document.getElementById("dropdown");
+
+      hamburger.addEventListener("click", () => {
+        dropdown.style.display =
+          dropdown.style.display === "flex" ? "none" : "flex";
+      });
+
+      document.addEventListener("click", e => {
+        if (!hamburger.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = "none";
+        }
+      });
+    </script>
   </body>
 </html>

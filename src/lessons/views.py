@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from users.models import LearningProfile
 from .models import Topic, Lesson
 from .ai_lesson_generator import generate_lessons
-
+import markdown
 
 @login_required
 def topic_list_view(request):
@@ -53,10 +53,11 @@ def lesson_detail_view(request, lesson_id):
     }
 
     dominant_style = max(learning_styles, key=learning_styles.get)
-    
-    return render(request, 'lesson_detail.html', {
+
+    context = {
         'lesson': lesson,
         'topic': lesson.topic,
         'dominant_style': dominant_style,
-        'learning_styles': learning_styles
-    })
+    }
+    
+    return render(request, 'lesson_detail.html', context)

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Literal, List
 import json
 from .models import DifficultyQuestions
+from utils import config
 
 from dotenv import load_dotenv
 
@@ -61,7 +62,7 @@ def generate_difficulty_questions(subject):
         try:
             print(f"Generating questions for {subject}")
             response = client.chat.completions.create(
-                model="openai/gpt-oss-20b",
+                model=config.MODEL,
                 messages=[
                     {"role": "system", "content": "You are an expert educator creating assessment questions."},
                     {

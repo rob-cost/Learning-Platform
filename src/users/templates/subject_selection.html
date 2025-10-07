@@ -1,152 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choose Your Subject</title>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="assessment-container">
+  <h1>Choose Your Learning Subject</h1>
 
-    <style>
-      :root {
-        --primary-color: #2ecc71;
-        --primary-hover: #27ae60;
-        --background: #f4f6f5;
-        --text-color: #333;
-        --border-color: #ddd;
-        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      }
+  <!-- {% if success %}
+  <div class="success-message">
+    <p>Great! You chose: <strong>{{ chosen_subject }}</strong></p>
+    <p>Subject saved successfully!</p>
+  </div>
+  {% endif %} -->
 
-      body {
-        font-family: "Inter", Arial, sans-serif;
-        background-color: var(--background);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-      }
+  <!-- <form method="post">
+    {% csrf_token %} {% if form.chosen_subject.errors %}
+    <div class="error-message">{{ form.chosen_subject.errors }}</div>
+    {% endif %}
 
-      .container {
-        background: white;
-        width: 100%;
-        max-width: 500px;
-        border-radius: 16px;
-        box-shadow: var(--shadow);
-        padding: 40px 35px;
-      }
+    <div>
+      <p>{{ form.chosen_subject.label }}</p>
+      {{ form.chosen_subject }}
+    </div> -->
 
-      h1 {
-        text-align: center;
-        color: var(--text-color);
-        font-size: 26px;
-        margin-bottom: 30px;
-        border-bottom: 3px solid var(--primary-color);
-        display: inline-block;
-        padding-bottom: 8px;
-      }
+  <form method="post">
+    {% csrf_token %} {{ form.as_p }}
 
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      label,
-      p {
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 5px;
-      }
-
-      select {
-        width: 100%;
-        padding: 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        font-size: 15px;
-        box-sizing: border-box;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-        outline: none;
-      }
-
-      .success-message {
-        background-color: #eafaf1;
-        color: #1b7a3d;
-        border: 1px solid #b7e3c1;
-        padding: 15px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        text-align: center;
-        font-size: 15px;
-        line-height: 1.5;
-      }
-
-      .error-message {
-        color: #c0392b;
-        background-color: #fbeaea;
-        border: 1px solid #f5b7b1;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        font-size: 14px;
-      }
-
-      button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.2s ease, transform 0.1s ease;
-      }
-
-      button:hover {
-        background-color: var(--primary-hover);
-      }
-
-      button:active {
-        transform: scale(0.98);
-      }
-
-      @media (max-width: 480px) {
-        .container {
-          padding: 30px 20px;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <h1>Choose Your Learning Subject</h1>
-
-      {% if success %}
-      <div class="success-message">
-        <p>Great! You chose: <strong>{{ chosen_subject }}</strong></p>
-        <p>Subject saved successfully!</p>
-      </div>
-      {% endif %}
-
-      <form method="post">
-        {% csrf_token %} {% if form.chosen_subject.errors %}
-        <div class="error-message">{{ form.chosen_subject.errors }}</div>
-        {% endif %}
-
-        <div>
-          <p>{{ form.chosen_subject.label }}</p>
-          {{ form.chosen_subject }}
-        </div>
-
-        <button type="submit">Choose Subject</button>
-      </form>
-    </div>
-  </body>
-</html>
+    <button type="submit">Choose Subject</button>
+  </form>
+</div>
+{% endblock %}

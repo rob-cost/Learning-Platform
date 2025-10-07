@@ -1,170 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up</title>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="signup-container">
+  <h1>Create Account</h1>
 
-    <style>
-      :root {
-        --primary-color: #2ecc71;
-        --primary-hover: #27ae60;
-        --background: #f4f6f5;
-        --text-color: #333;
-        --border-color: #ddd;
-      }
+  <form method="post">
+    {% csrf_token %}
 
-      body {
-        font-family: "Inter", Arial, sans-serif;
-        background-color: var(--background);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-        padding: 20px;
-      }
-
-      .container {
-        background: white;
-        width: 100%;
-        max-width: 420px;
-        border-radius: 16px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        padding: 40px 35px;
-        transition: all 0.3s ease;
-      }
-
-      .container:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-      }
-
-      h1 {
-        text-align: center;
-        color: var(--text-color);
-        margin-bottom: 25px;
-        font-size: 28px;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: var(--text-color);
-      }
-
-      input[type="text"],
-      input[type="password"] {
-        width: 94%;
-        padding: 12px 14px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 15px;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      input[type="text"]:focus,
-      input[type="password"]:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
-        outline: none;
-      }
-
-      .helptext,
-      .help {
-        font-size: 12px;
-        color: #777;
-        margin-top: 4px;
-        margin-left: 2px;
-        display: block;
-        padding: 0;
-      }
-
-      button {
-        width: 100%;
-        background-color: var(--primary-color);
-        color: white;
-        padding: 14px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 600;
-        transition: background-color 0.2s ease, transform 0.1s ease;
-      }
-
-      button:hover {
-        background-color: var(--primary-hover);
-      }
-
-      button:active {
-        transform: scale(0.98);
-      }
-
-      p {
-        text-align: center;
-        margin-top: 25px;
-        color: #555;
-      }
-
-      a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      a:hover {
-        text-decoration: underline;
-      }
-
-      @media (max-width: 480px) {
-        .container {
-          padding: 30px 20px;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-          width: 100%; /* Full width on mobile for usability */
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <h1>Create Account</h1>
-
-      <form method="post">
-        {% csrf_token %}
-
-        <div class="form-group">
-          <label>Username</label>
-          {{ form.username }} {{ form.username.errors }}
-        </div>
-
-        <div class="form-group">
-          <label>Password</label>
-          {{ form.password1 }} {{ form.password1.errors }}
-          <small class="help">{{ form.password1.help_text }}</small>
-        </div>
-
-        <div class="form-group">
-          <label>Confirm Password</label>
-          {{ form.password2 }} {{ form.password2.errors }}
-        </div>
-
-        <button type="submit">Create Account</button>
-      </form>
-
-      <p>
-        Already have an account?
-        <a href="{% url 'login' %}">Login here</a>
-      </p>
+    <div class="form-group">
+      <label>Username</label>
+      {{ form.username }} {{ form.username.errors }}
     </div>
-  </body>
-</html>
+
+    <div class="form-group">
+      <label>Password</label>
+      {{ form.password1 }} {{ form.password1.errors }}
+      <small class="help">{{ form.password1.help_text }}</small>
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password</label>
+      {{ form.password2 }} {{ form.password2.errors }}
+    </div>
+
+    <button type="submit">Create Account</button>
+  </form>
+
+  <p class="signup-link">
+    Already have an account?
+    <a href="{% url 'login' %}">Login here</a>
+  </p>
+</div>
+{% endblock %}

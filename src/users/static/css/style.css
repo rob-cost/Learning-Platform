@@ -1,0 +1,242 @@
+:root {
+    --primary-color: #2ecc71;
+    --primary-hover: #27ae60;
+    --background: #f4f6f5;
+    --text-color: #333;
+    --border-color: #ddd;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Body and layout */
+body {
+    font-family: "Inter", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow-y: auto;
+}
+
+/* Login, Signup container */
+.login-container,
+.signup-container {
+    background: rgba(255, 255, 255, 0.95);
+    width: 100%;
+    max-width: 420px;
+    margin: 40px 20px;
+    /* margin adjusts automatically for mobile */
+    padding: 40px 35px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.login-container:hover,
+.signup-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Heading */
+.login-container h1,
+.signup-container h1 {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 25px;
+    font-size: 28px;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+    outline: none;
+}
+
+/* Error messages */
+.errorlist {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 8px;
+    list-style: none;
+    padding: 10px 15px;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    text-align: center;
+}
+
+
+.help,
+.helptext {
+    position: absolute;
+    top: 100%;
+    /* just below the input */
+    left: 0;
+    width: 100%;
+    background: #f4f6f5;
+    /* light background */
+    border: 1px solid #ddd;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(-5px);
+    /* start slightly up */
+    z-index: 10;
+    /* ensure it floats above other elements */
+}
+
+
+.form-group input[type="password"]:hover+.help,
+.form-group input[type="password"]:focus+.help {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    /* animate down into place */
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Signup link */
+.signup-link {
+    text-align: center;
+    margin-top: 25px;
+    color: #555;
+}
+
+.signup-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.signup-link a:hover {
+    text-decoration: underline;
+}
+
+/* Assessment & Questionaire */
+
+.assessment-container {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 40px 35px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--text-color);
+    font-size: 28px;
+    margin-bottom: 30px;
+    border-bottom: 3px solid var(--primary-color);
+    display: inline-block;
+    padding-bottom: 8px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 30px 20px;
+    }
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-container {
+        padding: 35px 25px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+}
