@@ -4,24 +4,6 @@
 {% block content%}
 <div class="assessment-container">
   <h1>Choose Your Learning Subject</h1>
-
-  <!-- {% if success %}
-  <div class="success-message">
-    <p>Great! You chose: <strong>{{ chosen_subject }}</strong></p>
-    <p>Subject saved successfully!</p>
-  </div>
-  {% endif %} -->
-
-  <!-- <form method="post">
-    {% csrf_token %} {% if form.chosen_subject.errors %}
-    <div class="error-message">{{ form.chosen_subject.errors }}</div>
-    {% endif %}
-
-    <div>
-      <p>{{ form.chosen_subject.label }}</p>
-      {{ form.chosen_subject }}
-    </div> -->
-
   <form method="post">
     {% csrf_token %} {{ form.as_p }}
 

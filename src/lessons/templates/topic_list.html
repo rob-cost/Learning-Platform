@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Learning Path</title>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="topiclist-container">
+  <a href="{% url 'profile_page' %}" class="back-link">← Go to Profile</a>
 
-    <style>
+  <div class="header">
+    <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
+    <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
+  </div>
+
+  {% if topics %} {% for topic in topics %}
+  <a href="{% url 'topic_detail' topic.id %}">
+    <div class="topic-card">
+      <div class="topic-number">Topic {{ topic.order }}</div>
+      <div class="topic-title">{{ topic.topic_name }}</div>
+      <div class="topic-description">{{ topic.description }}</div>
+    </div>
+  </a>
+  {% endfor %} {% else %}
+  <p>No topics available yet. Please complete your assessment.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+<!-- <style>
       :root {
         --primary-color: #2ecc71;
         --primary-hover: #27ae60;
@@ -29,7 +48,7 @@
         text-decoration: none;
       }
 
-      .container {
+      .topiclist-container {
         max-width: 900px;
         margin: 0 auto;
       }
@@ -109,29 +128,4 @@
           padding: 18px;
         }
       }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <a href="{% url 'profile_page' %}" class="back-link">← Go to Profile</a>
-
-      <div class="header">
-        <h1>Your Learning Path: {{ profile.get_chosen_subject_display }}</h1>
-        <p><strong>Current Level:</strong> {{ profile.difficulty_level }}</p>
-      </div>
-
-      {% if topics %} {% for topic in topics %}
-      <a href="{% url 'topic_detail' topic.id %}">
-        <div class="topic-card">
-          <div class="topic-number">Topic {{ topic.order }}</div>
-          <div class="topic-title">{{ topic.topic_name }}</div>
-          <div class="topic-description">{{ topic.description }}</div>
-        </div>
-      </a>
-      {% endfor %} {% else %}
-      <p>No topics available yet. Please complete your assessment.</p>
-      {% endif %}
-    </div>
-  </body>
-</html>
+    </style> -->

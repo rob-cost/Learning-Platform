@@ -1,11 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ lesson.lesson_title }}</title>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="lessondetail-container">
+  <a href="{% url 'topic_detail' topic.id %}" class="back-link">
+    ← Back to {{ topic.topic_name }}
+  </a>
 
-    <style>
+  <div class="lesson-header">
+    <h1>{{ lesson.lesson_title }}</h1>
+    <p>
+      <strong>Estimated Duration:</strong> {{ lesson.estimated_duration }}
+      minutes
+    </p>
+  </div>
+
+  <!-- Visual Content -->
+  <div class="content-section visual-section">
+    <div class="section-title">
+      <span class="section-icon">👁️</span>
+      Visual Learning {% if dominant_style == 'visual' %}
+      <span class="dominant-badge">Your Preferred Style</span>
+      {% endif %}
+    </div>
+    <div class="content-text">
+      {{ lesson.lesson_content.visual_content | safe }}
+    </div>
+  </div>
+
+  <!-- Hands-On Content -->
+  <div class="content-section hands-on-section">
+    <div class="section-title">
+      <span class="section-icon">✋</span>
+      Hands-On Practice {% if dominant_style == 'hands_on' %}
+      <span class="dominant-badge">Your Preferred Style</span>
+      {% endif %}
+    </div>
+    <div class="content-text">
+      {{ lesson.lesson_content.hands_on_content | safe }}
+    </div>
+  </div>
+
+  <!-- Reading Content -->
+  <div class="content-section reading-section">
+    <div class="section-title">
+      <span class="section-icon">📖</span>
+      Reading Material {% if dominant_style == 'reading' %}
+      <span class="dominant-badge">Your Preferred Style</span>
+      {% endif %}
+    </div>
+    <div class="content-text">
+      {{ lesson.lesson_content.reading_content | safe }}
+    </div>
+  </div>
+
+  <button class="completion-button" onclick="markComplete()">
+    Mark as Complete
+  </button>
+</div>
+
+<script>
+  function markComplete() {
+    alert("Lesson completion tracking coming soon!");
+    // You'll implement this later to update UserProgress
+  }
+</script>
+{% endblock %}
+
+<!-- <style>
       :root {
         --primary-color: #2ecc71;
         --primary-hover: #27ae60;
@@ -32,7 +94,7 @@
         text-decoration: none;
       }
 
-      .container {
+      .lessondetail-container {
         max-width: 1000px;
         margin: 0 auto;
       }
@@ -144,72 +206,4 @@
           padding: 20px;
         }
       }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <a href="{% url 'topic_detail' topic.id %}" class="back-link">
-        ← Back to {{ topic.topic_name }}
-      </a>
-
-      <div class="lesson-header">
-        <h1>{{ lesson.lesson_title }}</h1>
-        <p>
-          <strong>Estimated Duration:</strong> {{ lesson.estimated_duration }}
-          minutes
-        </p>
-      </div>
-
-      <!-- Visual Content -->
-      <div class="content-section visual-section">
-        <div class="section-title">
-          <span class="section-icon">👁️</span>
-          Visual Learning {% if dominant_style == 'visual' %}
-          <span class="dominant-badge">Your Preferred Style</span>
-          {% endif %}
-        </div>
-        <div class="content-text">
-          {{ lesson.lesson_content.visual_content | safe }}
-        </div>
-      </div>
-
-      <!-- Hands-On Content -->
-      <div class="content-section hands-on-section">
-        <div class="section-title">
-          <span class="section-icon">✋</span>
-          Hands-On Practice {% if dominant_style == 'hands_on' %}
-          <span class="dominant-badge">Your Preferred Style</span>
-          {% endif %}
-        </div>
-        <div class="content-text">
-          {{ lesson.lesson_content.hands_on_content | safe }}
-        </div>
-      </div>
-
-      <!-- Reading Content -->
-      <div class="content-section reading-section">
-        <div class="section-title">
-          <span class="section-icon">📖</span>
-          Reading Material {% if dominant_style == 'reading' %}
-          <span class="dominant-badge">Your Preferred Style</span>
-          {% endif %}
-        </div>
-        <div class="content-text">
-          {{ lesson.lesson_content.reading_content | safe }}
-        </div>
-      </div>
-
-      <button class="completion-button" onclick="markComplete()">
-        Mark as Complete
-      </button>
-    </div>
-
-    <script>
-      function markComplete() {
-        alert("Lesson completion tracking coming soon!");
-        // You'll implement this later to update UserProgress
-      }
-    </script>
-  </body>
-</html>
+    </style> -->

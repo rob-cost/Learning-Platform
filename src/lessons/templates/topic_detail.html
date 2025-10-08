@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ topic.topic_name }}</title>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="topicdetail-container">
+  <a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
 
-    <style>
+  <div class="header">
+    <h1>{{ topic.topic_name }}</h1>
+    <p>{{ topic.description }}</p>
+  </div>
+
+  {% if lessons %} {% for lesson in lessons %}
+  <a href="{% url 'lesson_detail' lesson.id %}">
+    <div class="lesson-card">
+      <div class="lesson-number">Lesson {{ lesson.order }}</div>
+      <div class="lesson-title">{{ lesson.lesson_title }}</div>
+      <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
+    </div>
+  </a>
+  {% endfor %} {% else %}
+  <p>Generating lessons for this topic...</p>
+  {% endif %}
+</div>
+{% endblock %}
+<!-- <style>
       :root {
         --primary-color: #2ecc71;
         --primary-hover: #27ae60;
@@ -44,7 +62,7 @@
         text-decoration: none;
       }
 
-      .container {
+      .topicdetail-container {
         max-width: 900px;
         margin: 0 auto;
       }
@@ -124,31 +142,4 @@
           padding: 18px;
         }
       }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
-
-      <div class="header">
-        <h1>{{ topic.topic_name }}</h1>
-        <p>{{ topic.description }}</p>
-      </div>
-
-      {% if lessons %} {% for lesson in lessons %}
-      <a href="{% url 'lesson_detail' lesson.id %}">
-        <div class="lesson-card">
-          <div class="lesson-number">Lesson {{ lesson.order }}</div>
-          <div class="lesson-title">{{ lesson.lesson_title }}</div>
-          <div class="lesson-duration">
-            {{ lesson.estimated_duration }} minutes
-          </div>
-        </div>
-      </a>
-      {% endfor %} {% else %}
-      <p>Generating lessons for this topic...</p>
-      {% endif %}
-    </div>
-  </body>
-</html>
+    </style> -->
