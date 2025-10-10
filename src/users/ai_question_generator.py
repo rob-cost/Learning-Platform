@@ -23,37 +23,37 @@ class AssessmentQuestions(BaseModel):
     questions: List[AssessmentQuestion]
 
 
-def generate_difficulty_questions(subject):
+# PROBLEM: QUESTIONS ARE REGENERATED IN RETAKE ASSESSMENT AT EVERY PAGE RELOAD
+def generate_difficulty_questions(subject, is_retake = False):
 
-    questions_count = DifficultyQuestions.objects.filter(subject = subject).count()
-    if questions_count == 5 :
-        db_questions = DifficultyQuestions.objects.filter(subject = subject)
+    existing_questions = DifficultyQuestions.objects.filter(subject = subject)
+    
+    if existing_questions.count() == 10 and not is_retake:
         pydantic_questions = []
-        for db_q in db_questions:
+        for q in existing_questions:
             pydantic_q = AssessmentQuestion(
-                question = db_q.question_text,
-                answer = db_q.answers,
-                correct_answer = db_q.correct_answer,
-                difficulty_level = db_q.difficulty_level,
-                points = db_q.points
+                question = q.question_text,
+                answer = q.answers,
+                correct_answer = q.correct_answer,
+                difficulty_level = q.difficulty_level,
+                points = q.points
             )
             pydantic_questions.append(pydantic_q)
-            
         return pydantic_questions
     
-    if 0 < questions_count < 5:
-        DifficultyQuestions.objects.filter(subject = subject).delete()
+    else:
+        existing_questions.delete()
     
         subject_prompt = {
-            'programming': """ Generate 5 multiple choice questions to assess programming knowledge level. 
+            'programming': """ Generate 10 multiple choice questions to assess programming knowledge level. 
             Include questions covering: basic syntax, variables, functions, loops, and problem-solving. 
             Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
             Each question should have exactly 4 options.""",
-            'music': """ Generate 5 multiple choice questions to assess musical theory and composition knowledge.
+            'music': """ Generate 10 multiple choice questions to assess musical theory and composition knowledge.
             Include questions covering: notes, scales, rhythm, harmony, and basic composition.
             Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
             Each question should have exactly 4 options.""",
-            'art': """Generate 5 multiple choice questions to assess art history and crafting knowledge.
+            'art': """Generate 10 multiple choice questions to assess art history and crafting knowledge.
             Include questions covering: color theory, famous artists, techniques, art periods, and composition.
             Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
             Each question should have exactly 4 options."""
@@ -89,6 +89,7 @@ def generate_difficulty_questions(subject):
                     difficulty_level = question.difficulty_level,
                     points = question.points
                 )
+            
             return question_data.questions
         
     

@@ -54,17 +54,12 @@
     </div>
   </div>
 
-  <button class="completion-button" onclick="markComplete()">
-    Mark as Complete
-  </button>
+  <form method="POST" action="{% url 'mark_lesson_complete' lesson.id %}">
+    {% csrf_token %}
+    <button type="submit" class="completion-button">Mark as Complete</button>
+  </form>
 </div>
 
-<script>
-  function markComplete() {
-    alert("Lesson completion tracking coming soon!");
-    // You'll implement this later to update UserProgress
-  }
-</script>
 {% endblock %}
 
 <!-- <style>

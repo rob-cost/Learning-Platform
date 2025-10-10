@@ -24,7 +24,7 @@ class Topic (models.Model):
     class Meta:
         ordering = ['difficulty_level', 'order']
         unique_together = ['subject', 'difficulty_level', 'order']
-    
+     
     def __str__(self):
         return f"{self.subject} - {self.difficulty_level} - {self.topic_name}"
         
@@ -37,7 +37,7 @@ class Lesson (models.Model):
     estimated_duration = models.IntegerField(default=30, help_text="Estimated minutes to complete")
     created_at = models.DateTimeField(auto_now_add=True)
     
-    class Meta:
+    class Meta: 
         ordering = ['topic', 'order']
         unique_together = ['topic', 'order']
     

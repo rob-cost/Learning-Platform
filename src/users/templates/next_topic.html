@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="modal-overlay">
+  <div class="modal">
+    <h2>Topic Level completed</h2>
+
+    {%if current_level == 'advanced'%}
+    <p>Well done {{username}}! You have successfully completed the course!</p>
+    {% else %}
+    <p>Well done {{username}}! You advanced level</p>
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit" name="choice" value="update" class="btn-confirm">
+        Ok
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

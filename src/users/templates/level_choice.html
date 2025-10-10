@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+{% extends "base.html" %} {% block title %}Login{% endblock %}
+<!-- leave it -->
+{% block content%}
+<div class="modal-overlay">
+  <div class="modal">
+    <h2>Level Upgrade Available</h2>
+    <p>
+      You improved your score from <strong>{{ previous_score }}%</strong> ({{
+      previous_level }}) to <strong>{{ new_score }}%</strong> ({{ new_level }}).
+    </p>
+    <p>Would you like to update your lessons to match your new level?</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      <button type="submit" name="choice" value="update" class="btn-confirm">
+        Yes, update
+      </button>
+      <button type="submit" name="choice" value="keep" class="btn-cancel">
+        No, keep old level
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

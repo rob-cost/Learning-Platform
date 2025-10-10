@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from .models import Lesson
 from utils import config
 import markdown2
+from celery import shared_task
 
 load_dotenv()
 
@@ -42,23 +43,22 @@ def markdown_to_html(md_text: str) -> str:
         ]
     ) 
 
-def generate_lessons(topic_name, subject, difficulty_level):
+@shared_task
+def generate_lessons_task(topic_id):
 
-    top_obj = Topic.objects.get(
-             topic_name = topic_name,
-             subject = subject,
-             difficulty_level = difficulty_level
+    topic = Topic.objects.get(
+             id = topic_id
         )
 
-    lesson_count = Lesson.objects.filter(topic = top_obj).count()
+    lesson_count = Lesson.objects.filter(topic = topic).count()
     if lesson_count == 4:
-         return 
-    if lesson_count >= 0:
-        Lesson.objects.filter(topic = top_obj).delete()
-        prompt = f"""Create 4 comprehensive lessons for the topic: "{topic_name}" 
+         pass 
+    else:
+        Lesson.objects.filter(topic = topic).delete()
+        prompt = f"""Create 4 comprehensive lessons for the topic: "{topic.topic_name}" 
         
-                    Subject: {subject}
-                    Difficulty Level: {difficulty_level}
+                    Subject: {topic.subject}
+                    Difficulty Level: {topic.difficulty_level}
 
                     For each lesson, provide content in THREE distinct learning styles:
 
@@ -92,7 +92,7 @@ def generate_lessons(topic_name, subject, difficulty_level):
                     - Ensure logical progression across the 4 lessons
                     - Include at least 3 concrete, real-world examples for each concept
                     - Provide code snippets with detailed line-by-line explanations
-                    - Make content appropriate for {difficulty_level} level
+                    - Make content appropriate for {topic.difficulty_level} level
                     - Each lesson should take approximately from 20 to 50 minutes to complete
                     - Number lessons sequentially (order: 1, 2, 3, 4)
                     - Use valid Markdown for headings, lists, bold, italics, and code blocks
@@ -125,7 +125,7 @@ def generate_lessons(topic_name, subject, difficulty_level):
                 html_hands_on = markdown_to_html(lesson.hands_on_content)
                 html_reading = markdown_to_html(lesson.reading_content)
                 Lesson.objects.create(
-                    topic = top_obj,
+                    topic = topic,
                     lesson_title = lesson.lesson_title,
                     order = lesson.order,
                     estimated_duration = lesson.estimated_duration,

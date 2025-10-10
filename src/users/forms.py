@@ -48,9 +48,9 @@ class SubjectSelectionForm(forms.Form):
 
 class DifficultyAssessmentForm(forms.Form):
     
-    def __init__(self, subject, *args, **kwargs):
+    def __init__(self, questions_data, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        questions_data = generate_difficulty_questions(subject)
+        
         i = 1
     
         for question in questions_data:

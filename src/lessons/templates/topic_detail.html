@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 {% extends "base.html" %} {% block title %}Login{% endblock %}
 <!-- leave it -->
-{% block content%}
-<div class="topicdetail-container">
-  <a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
-
-  <div class="header">
-    <h1>{{ topic.topic_name }}</h1>
-    <p>{{ topic.description }}</p>
-  </div>
-
-  {% if lessons %} {% for lesson in lessons %}
-  <a href="{% url 'lesson_detail' lesson.id %}">
-    <div class="lesson-card">
-      <div class="lesson-number">Lesson {{ lesson.order }}</div>
-      <div class="lesson-title">{{ lesson.lesson_title }}</div>
-      <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
-    </div>
-  </a>
-  {% endfor %} {% else %}
-  <p>Generating lessons for this topic...</p>
-  {% endif %}
+{% block content%} {% if not lessons_ready %}
+<div class="loader">
+  <div class="spinner"></div>
+  <p>Generating lessons for... please wait.</p>
 </div>
-{% endblock %}
+{% else %}
+<a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
+
+<div class="header">
+  <h1>{{ topic.topic_name }}</h1>
+  <p>{{ topic.description }}</p>
+</div>
+
+{% for lesson in lessons %}
+<a href="{% url 'lesson_detail' lesson.id %}">
+  <div
+    class="lesson-card {% if lesson.id in completed_lessons %}completed{% endif %}"
+  >
+    <div class="lesson-number">Lesson {{ lesson.order }}</div>
+    <div class="lesson-title">{{ lesson.lesson_title }}</div>
+    <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
+  </div>
+</a>
+
+{% endfor %} {% endif %} {% endblock %}
 <!-- <style>
       :root {
         --primary-color: #2ecc71;

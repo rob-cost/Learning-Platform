@@ -43,7 +43,20 @@
       <p><strong>Difficulty:</strong> {{ profile.difficulty_level }}</p>
       <p><strong>Score:</strong> {{ profile.assessment_score }}%</p>
 
-      <a href="{}" class="retake-btn">Retake Assessment</a>
+      <a href="{% url 'retake_assessment' %}" class="retake-btn"
+        >Retake Assessment</a
+      >
+    </div>
+    <div class="profile-section">
+      <h2>Learning Progress</h2>
+      <p>{{ completed_lessons }} of {{ total_lessons }} lessons completed</p>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          style="--width: {{ progress_percentage }}%"
+        ></div>
+      </div>
+      <p>{{ progress_percentage }}% completed</p>
     </div>
   </div>
 
@@ -51,7 +64,10 @@
     <div class="profile-section">
       <h2>Personalized Lessons</h2>
       {% if topics %} {% for topic in topics %}
-      <a href="{% url 'topic_detail' topic.id %}" class="topic-card">
+      <a
+        href="{% url 'topic_detail' topic.id %}"
+        class="topic-card {% if topic.is_completed %}completed{% endif %}"
+      >
         <div class="topic-title">{{ topic.topic_name }}</div>
         <div class="topic-description">{{ topic.description }}</div>
       </a>

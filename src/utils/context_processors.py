@@ -4,7 +4,12 @@ from users.models import LearningProfile
 def background_image(request):
     if not request.user.is_authenticated:
         return {}
-
+    
+    # check cache
+    bg_image = request.session.get('bg_image')
+    if bg_image:
+        return {"bg_image": bg_image}
+    
     profile = request.user.learningprofile
     chosen_subject = profile.chosen_subject
     subject_bg = {
@@ -13,10 +18,9 @@ def background_image(request):
         "programming": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80",
     }
 
-    if not chosen_subject:
-        bg_image = "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80"
-    else:
-        bg_image = subject_bg[chosen_subject]
+    bg_image = subject_bg.get(chosen_subject, "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80" )
 
+    # save bg image into cache
+    request.session["bg_image"] = bg_image
     return {"bg_image": bg_image}
-
+ 

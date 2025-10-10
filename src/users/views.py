@@ -6,15 +6,9 @@ from django.contrib.auth.decorators import login_required
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
 from .models import LearningProfile
-from lessons.models import Topic
+from lessons.models import Topic, Lesson, UserProgress
 from .ai_question_generator import generate_difficulty_questions
 from lessons.ai_topic_generator import generate_topic
-
-
-
-# user_answers = [
-#     {'question_id': 1, 'selected_option': 0},  # First option (reading, 3 points)
-# ]
 
 user_answers = []
 
@@ -115,37 +109,105 @@ def subject_selection_view(request):
 def difficulty_assessment_view(request):
     profile = request.user.learningprofile
     chosen_subject = profile.chosen_subject
+    is_retake = request.session.get('retake_assessment', False)
 
-    if profile.registration_step != 3:
+    if profile.registration_step != 3 and not is_retake:
         messages.error(request, "You already completed this step.")
         return redirect('landing')
+    
+    questions_data = generate_difficulty_questions(chosen_subject, is_retake)
 
     if request.method == "POST":
-        form = DifficultyAssessmentForm(subject = chosen_subject, data = request.POST)
-
+        form = DifficultyAssessmentForm(questions_data, request.POST)
         if form.is_valid():
             assessment_score = form.get_user_answers_with_correct()
-            profile = LearningProfile.objects.get(user = request.user)
+
+            if assessment_score > 80:
+                new_level = 'advanced'
+            elif assessment_score >50:
+                new_level = 'intermediate'
+            else:
+                new_level = 'beginner'
+
+            if is_retake:
+                previous_level = request.session.get('previous_level')
+                level_order = {
+                    'beginner': 1,
+                    'intermediate': 2,
+                    'advanced': 3
+                }
+                if level_order[new_level] > level_order[previous_level]:
+                    request.session['new_level'] = new_level
+                    request.session['new_score'] = assessment_score
+                    return redirect('level_choice')
+                
+                profile.assessment_score = assessment_score
+                profile.save()
+                messages.info(request, f'Assessment completed. You scored: {assessment_score}. You remain at {previous_level} level.')
+                request.session.pop('retake_assessment', None) 
+                return redirect('profile_page')
+            
             profile.assessment_score = assessment_score
+            profile.difficulty_level = new_level
             profile.difficulty_assessment_completed = True
             profile.registration_step = 4
-            if assessment_score > 80:
-                profile.difficulty_level = 'advanced'
-            elif assessment_score >50:
-                profile.difficulty_level = 'intermediate'
-            else:
-                profile.difficulty_level = 'beginner'
             profile.save()
 
             generate_topic(chosen_subject)
 
             messages.success(request, "Well done you have completed the registration process!")
             return redirect('profile_page') 
-
     else:
-        form = DifficultyAssessmentForm(subject = chosen_subject)
-
+        form = DifficultyAssessmentForm(questions_data)
     return render(request, 'difficulty_assessment.html', {'form': form})
+
+@login_required
+def retake_assessment_view(request):
+    profile = request.user.learningprofile
+    progress_percentage = request.session.get('progress_percentage')
+
+    if progress_percentage > 5:
+        request.session["retake_assessment"] = True
+        request.session["previous_level"] = profile.difficulty_level
+        request.session["previous_score"] = profile.assessment_score
+
+        return redirect('difficulty_assessment')
+    else:
+        messages.info(request, f'You need to complete at least 80% of the program')
+        return redirect('profile_page')
+
+@login_required
+def level_choice_view(request):
+    profile = request.user.learningprofile
+    chosen_subject = profile.chosen_subject
+    new_level = request.session.get('new_level')
+    new_score = request.session.get('new_score')
+
+    if request.method == "POST":
+        choice = request.POST.get('choice')
+
+        if choice =='update':
+            profile.assessment_score = new_score
+            profile.difficulty_level = new_level
+            profile.save()
+            generate_topic(chosen_subject)
+            messages.success(request, f"Your level has been updated to {new_level.capitalize()}!")
+        else:
+            messages.info(request, f'You kept your previous level')
+        
+        request.session.pop('new_level', None)
+        request.session.pop('new_score', None)
+        request.session.pop('retake_assessment', None)
+            
+        return redirect('profile_page')
+    
+    context = {
+        'new_level' : new_level,
+        'new_score' : new_score,
+        'previous_level' : profile.difficulty_level,
+        'previous_score' : profile.assessment_score
+    }
+    return render(request, 'level_choice.html', context )
 
 def test_generate_ai_questions(request):
     questions = generate_difficulty_questions('programming')
@@ -187,15 +249,72 @@ def profile_view(request):
     chosen_subject = profile.chosen_subject
     difficulty_level = profile.difficulty_level
 
+    # display topics in order
     topics = Topic.objects.filter(
         subject = chosen_subject,
         difficulty_level = difficulty_level
     ).order_by('order')
 
+
+    # check if a topic has been completed
+    for topic in topics:
+        lessons_topic = Lesson.objects.filter(topic = topic)
+        completed_count = UserProgress.objects.filter(user = request.user, lesson__in = lessons_topic, completed = True ).count()
+        if lessons_topic.count() == completed_count and lessons_topic.count() != 0:
+            topic.is_completed = True
+        else:
+            topic.is_completed = False
+    
+    
+    # calculate progress percentage of user
+    expected_lessons = 40
+    completed_lessons = UserProgress.objects.filter(user = request.user, lesson__topic__in = topics, completed = True).count()
+    progress_percentage = round(completed_lessons / expected_lessons * 100)
+
+    request.session['progress_percentage'] = progress_percentage
+
+    if progress_percentage == 100 and not request.session.get('complete_notified', False):
+        return redirect('next_topic')
+
+    if progress_percentage < 100:
+        request.session.pop('complete_notified', None)
+
     context = {
         'profile' : profile,
         'username' : request.user.username,
         'topics': topics,
+        "total_lessons": expected_lessons,
+        "completed_lessons": completed_lessons,
+        "progress_percentage": progress_percentage,
     }
-
+ 
     return render(request, 'profile.html', context)
+
+@login_required
+def next_topic_view(request):
+    profile = request.user.learningprofile
+    current_difficulty_level = profile.difficulty_level
+
+    if request.method == "POST":
+        if current_difficulty_level == "advanced":
+            messages.info(request, f'Well done {request.user.username}. You have successfully completed the course!')
+        
+        else:
+            next_difficulty_level = {'beginner' : 'intermediate', 'intermediate': 'advanced'}
+            profile.difficulty_level = next_difficulty_level[current_difficulty_level]
+            profile.save()
+            messages.info(request, f'Well done {request.user.username}! You advanced level')
+
+        request.session['complete_notified'] = True 
+        return redirect('profile_page')
+    
+    context = {
+        'current_level': current_difficulty_level,
+        'username': request.user.username
+    }
+    return render(request, 'next_topic.html', context)
+    
+   
+  
+    
+    
