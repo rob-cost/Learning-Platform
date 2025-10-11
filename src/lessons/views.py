@@ -2,10 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from users.models import LearningProfile
 from .models import Topic, Lesson, UserProgress
 from .ai_lesson_generator import generate_lessons_task
-import markdown
+from django.http import JsonResponse
+
 
 @login_required
 def topic_list_view(request):
@@ -26,19 +26,13 @@ def topic_list_view(request):
 @login_required
 def topic_detail_view(request, topic_id):
     topic = Topic.objects.get(id=topic_id)
-    lessons = Lesson.objects.filter(topic = topic)
     completed_lessons = UserProgress.objects.filter(user = request.user, completed = True).values_list('lesson_id', flat=True)
 
-    print(f'Lesson count: {lessons.count()}, Topic: {topic}')
+    lessons = Lesson.objects.filter(topic = topic) 
 
-    if lessons.count() == 0:
-        generate_lessons_task.delay(
-            topic.id
-        )
+    if not lessons.exists():
+        generate_lessons_task.delay(topic.id)
         lessons_ready = False
-        # no time to generate new questions and get them
-        lessons = Lesson.objects.filter(topic = topic)
-        print(f'Lesson generated: {lessons}')
     else:
         lessons_ready = True
 
@@ -46,7 +40,7 @@ def topic_detail_view(request, topic_id):
         'topic': topic, 
         'lessons': lessons, 
         'completed_lessons': completed_lessons,
-        'lessons_ready' : lessons_ready
+        'lessons_ready': lessons_ready
     }
     return render(request, 'topic_detail.html', context )
 
@@ -87,3 +81,15 @@ def mark_lesson_completed(request, lesson_id):
             messages.info(request, f"You already completed '{lesson.lesson_title}'")
         
     return redirect('topic_detail', topic_id = lesson.topic.id )
+
+
+@login_required
+def check_lessons_status(request, topic_id):
+    topic = Topic.objects.get(id=topic_id)
+    lessons_count = Lesson.objects.filter(topic=topic).count()
+    
+    data = {
+        "ready": lessons_count == 4,
+        "lessons_count": lessons_count,
+    }
+    return JsonResponse(data)

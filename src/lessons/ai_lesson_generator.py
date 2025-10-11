@@ -1,13 +1,16 @@
 from groq import Groq
 from pydantic import BaseModel
-from .models import Topic
+from .models import Topic, Lesson
 from typing import List
 import json
 from dotenv import load_dotenv
-from .models import Lesson
 from utils import config
 import markdown2
 from celery import shared_task
+from django.db import transaction
+from django.contrib import messages
+from django.shortcuts import redirect
+
 
 load_dotenv()
 
@@ -46,64 +49,67 @@ def markdown_to_html(md_text: str) -> str:
 @shared_task
 def generate_lessons_task(topic_id):
 
-    topic = Topic.objects.get(
-             id = topic_id
-        )
+    # problem: more user can access the same topic 
+    topic = Topic.objects.get(id = topic_id)
 
-    lesson_count = Lesson.objects.filter(topic = topic).count()
-    if lesson_count == 4:
-         pass 
-    else:
-        Lesson.objects.filter(topic = topic).delete()
-        prompt = f"""Create 4 comprehensive lessons for the topic: "{topic.topic_name}" 
+    try:
+
+        lesson_count = Lesson.objects.filter(topic = topic).count()
+    
+        if lesson_count == 4:
+            pass 
         
-                    Subject: {topic.subject}
-                    Difficulty Level: {topic.difficulty_level}
+        with transaction.atomic():
 
-                    For each lesson, provide content in THREE distinct learning styles:
+            Lesson.objects.filter(topic = topic).delete()
+            
+            prompt = f"""Create 4 comprehensive lessons for the topic: "{topic.topic_name}" 
+            
+                        Subject: {topic.subject}
+                        Difficulty Level: {topic.difficulty_level}
 
-                    1. VISUAL_CONTENT:
-                    - Diagrams, charts, or visual metaphors (described in text)
-                    - Step-by-step visual breakdowns
-                    - Conceptual illustrations
-                    - Use clear headers and bullet points for visual scanning
-                    - Start with a clear overview diagram description
-                    - Include 3-4 visual examples or metaphors
-                    - Provide step-by-step visual breakdowns
+                        For each lesson, provide content in THREE distinct learning styles:
 
-                    2. HANDS_ON_CONTENT:
-                    - Practical exercises and activities
-                    - Code examples (for programming) or practice problems
-                    - Interactive challenges
-                    - Real-world application tasks
-                    - "Try this" activities
+                        1. VISUAL_CONTENT:
+                        - Diagrams, charts, or visual metaphors (described in text)
+                        - Step-by-step visual breakdowns
+                        - Conceptual illustrations
+                        - Use clear headers and bullet points for visual scanning
+                        - Start with a clear overview diagram description
+                        - Include 3-4 visual examples or metaphors
+                        - Provide step-by-step visual breakdowns
 
-                    3. READING_CONTENT:
-                    - Detailed theoretical explanations
-                    - In-depth analysis and context
-                    - Background information
-                    - Comprehensive written descriptions
-                    - Key concepts and definitions
+                        2. HANDS_ON_CONTENT:
+                        - Practical exercises and activities
+                        - Code examples (for programming) or practice problems
+                        - Interactive challenges
+                        - Real-world application tasks
+                        - "Try this" activities
 
-                    Requirements:
-                    - Each lesson must contain ALL three content types
-                    - Each content section should be at least 300-500 words
-                    - Provide comprehensive, detailed explanations with multiple examples
-                    - Ensure logical progression across the 4 lessons
-                    - Include at least 3 concrete, real-world examples for each concept
-                    - Provide code snippets with detailed line-by-line explanations
-                    - Make content appropriate for {topic.difficulty_level} level
-                    - Each lesson should take approximately from 20 to 50 minutes to complete
-                    - Number lessons sequentially (order: 1, 2, 3, 4)
-                    - Use valid Markdown for headings, lists, bold, italics, and code blocks
-                    - Code blocks: wrap code in triple backticks ``` with language, do NOT escape newlines
-                    - Do NOT escape Markdown characters (no `\\n`, `\\` for backticks)
+                        3. READING_CONTENT:
+                        - Detailed theoretical explanations
+                        - In-depth analysis and context
+                        - Background information
+                        - Comprehensive written descriptions
+                        - Key concepts and definitions
 
-                    Provide clear, engaging content that works for different learning preferences."""
+                        Requirements:
+                        - Each lesson must contain ALL three content types
+                        - Each content section should be at least 300-500 words
+                        - Provide comprehensive, detailed explanations with multiple examples
+                        - Ensure logical progression across the 4 lessons
+                        - Include at least 3 concrete, real-world examples for each concept
+                        - Provide code snippets with detailed line-by-line explanations
+                        - Make content appropriate for {topic.difficulty_level} level
+                        - Each lesson should take approximately from 20 to 50 minutes to complete
+                        - Number lessons sequentially (order: 1, 2, 3, 4)
+                        - Use valid Markdown for headings, lists, bold, italics, and code blocks
+                        - Code blocks: wrap code in triple backticks ``` with language, do NOT escape newlines
+                        - Do NOT escape Markdown characters (no `\\n`, `\\` for backticks)
 
-        try:
+                        Provide clear, engaging content that works for different learning preferences."""
             response = client.chat.completions.create(
-               model=config.MODEL,
+            model=config.MODEL,
                 messages=[
                     {"role": "system", "content": "You are an expert educational content creator who designs multi-modal learning experiences."},
                     {"role": "user", "content": prompt}
@@ -132,7 +138,8 @@ def generate_lessons_task(topic_id):
                     lesson_content = {'visual_content': html_visual, 'hands_on_content': html_hands_on, 'reading_content': html_reading}
                 )
             
-        
-        except Exception as e:
-                print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
-                return []
+        print(f"✅ Lessons successfully generated for topic: {topic.topic_name}")
+                
+    except Exception as e:
+            print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
+            return None

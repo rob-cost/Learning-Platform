@@ -137,7 +137,8 @@ a {
     max-width: 600px;
     border-radius: 16px;
     box-shadow: var(--shadow);
-    padding: 40px 35px;
+    padding: 30px 20px;
+    margin: 20px auto;
 }
 
 .profile-container {
@@ -240,7 +241,7 @@ a {
 .content-text {
     line-height: 1.8;
     color: var(--text-color);
-    white-space: pre-line;
+    /* white-space: pre-line; */
 }
 
 .dominant-badge {

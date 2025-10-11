@@ -2,10 +2,37 @@
 {% extends "base.html" %} {% block title %}Login{% endblock %}
 <!-- leave it -->
 {% block content%} {% if not lessons_ready %}
-<div class="loader">
-  <div class="spinner"></div>
-  <p>Generating lessons for... please wait.</p>
+<div id="lesson-container">
+  {% if not lessons %}
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
+  </div>
+  {% else %} {% include "partials/lesson_list.html" %} {% endif %}
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const topicId = "{{ topic.id }}";
+
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/topic/${topicId}/status/`);
+        const data = await response.json();
+
+        if (data.ready) {
+          window.location.reload(); // ✅ Reload full page when lessons are ready
+        }
+      } catch (err) {
+        console.error("Error checking lesson status:", err);
+      }
+    }
+
+    // check every 5 seconds
+    const interval = setInterval(checkStatus, 5000);
+  });
+</script>
+
 {% else %}
 <a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
 
