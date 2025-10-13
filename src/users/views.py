@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .assessment_data import ASSESSMENT_QUESTIONS
 from .forms import LearningStyleAssessmentForm, SubjectSelectionForm, DifficultyAssessmentForm
-from .models import LearningProfile
+from .models import LearningProfile, DifficultyQuestions
 from lessons.models import Topic, Lesson, UserProgress
 from .ai_question_generator import generate_difficulty_questions
 from lessons.ai_topic_generator import generate_topic
@@ -51,17 +51,12 @@ def learning_style_assessment_view(request):
             scores = calculate_learning_score(user_answers)
             print("Calculated scores:", scores)
 
-            profile, created = LearningProfile.objects.get_or_create(user=request.user)
+            profile = LearningProfile.objects.get(user=request.user)
             profile.visual_learning_score = scores['visual']
             profile.hands_on_learning_score = scores['hands_on']
             profile.reading_learning_score = scores['reading']
             profile.registration_step = 2
             profile.save()
-
-            if created:
-                print("User account created")
-            else:
-                print("Updated user account with scores")
 
 
         else:
@@ -90,15 +85,11 @@ def subject_selection_view(request):
             chosen_subject = form.cleaned_data['chosen_subject']
             print(f'user choose: {chosen_subject}')
 
-            profile, created = LearningProfile.objects.get_or_create(user=request.user)
+            profile = LearningProfile.objects.get(user=request.user)
             profile.chosen_subject = chosen_subject
             profile.registration_step = 3
             profile.save()
 
-            if created:
-                print("User profile created")
-            else:
-                print("User choose subject")
             return redirect('difficulty_assessment') 
     
     else:
@@ -117,8 +108,12 @@ def difficulty_assessment_view(request):
     
     questions_data = generate_difficulty_questions(chosen_subject, is_retake)
 
+    if not questions_data['success']:
+        messages.error(request, f'Error in generating questions. Please try again later.')
+        return redirect(request, 'login')
+
     if request.method == "POST":
-        form = DifficultyAssessmentForm(questions_data, request.POST)
+        form = DifficultyAssessmentForm(questions_data['questions'], request.POST)
         if form.is_valid():
             assessment_score = form.get_user_answers_with_correct()
 
@@ -158,7 +153,7 @@ def difficulty_assessment_view(request):
             messages.success(request, "Well done you have completed the registration process!")
             return redirect('profile_page') 
     else:
-        form = DifficultyAssessmentForm(questions_data)
+        form = DifficultyAssessmentForm(questions_data['questions'])
     return render(request, 'difficulty_assessment.html', {'form': form})
 
 @login_required
@@ -209,10 +204,6 @@ def level_choice_view(request):
     }
     return render(request, 'level_choice.html', context )
 
-def test_generate_ai_questions(request):
-    questions = generate_difficulty_questions('programming')
-    return render(request, 'test_questions.html', {'questions': questions})
-
 def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -248,6 +239,10 @@ def profile_view(request):
     profile = request.user.learningprofile
     chosen_subject = profile.chosen_subject
     difficulty_level = profile.difficulty_level
+
+    error_msg = request.GET.get("error")
+    if error_msg:
+        messages.error(request, error_msg)
 
     # display topics in order
     topics = Topic.objects.filter(

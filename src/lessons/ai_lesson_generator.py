@@ -8,8 +8,7 @@ from utils import config
 import markdown2
 from celery import shared_task
 from django.db import transaction
-from django.contrib import messages
-from django.shortcuts import redirect
+import asyncio
 
 
 load_dotenv()
@@ -53,6 +52,9 @@ def generate_lessons_task(topic_id):
     topic = Topic.objects.get(id = topic_id)
 
     try:
+        topic.status = 'pending'
+        topic.error_message = None
+        topic.save(update_fields=['status', 'error_message'])
 
         lesson_count = Lesson.objects.filter(topic = topic).count()
     
@@ -121,7 +123,7 @@ def generate_lessons_task(topic_id):
                         "schema": LessonCollection.model_json_schema()
                     }
                 },
-                temperature=0.8
+                temperature=0.7
             )
             raw_content = response.choices[0].message.content
             lessons_data = LessonCollection.model_validate(json.loads(raw_content))
@@ -137,9 +139,17 @@ def generate_lessons_task(topic_id):
                     estimated_duration = lesson.estimated_duration,
                     lesson_content = {'visual_content': html_visual, 'hands_on_content': html_hands_on, 'reading_content': html_reading}
                 )
-            
+
+
+        topic.status = "ready"
+        topic.save(update_fields=['status']) 
         print(f"✅ Lessons successfully generated for topic: {topic.topic_name}")
+        
                 
     except Exception as e:
-            print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
-            return None
+        topic.status = "not ready"
+        topic.error_message = str(e)
+        topic.save(update_fields=['status', 'error_message'])
+        print(f"❌ Issue with AI {e} question generator: {type(e).__name__}: {e}")
+ 
+  

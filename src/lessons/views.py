@@ -5,23 +5,7 @@ from django.utils import timezone
 from .models import Topic, Lesson, UserProgress
 from .ai_lesson_generator import generate_lessons_task
 from django.http import JsonResponse
-
-
-@login_required
-def topic_list_view(request):
-    profile = request.user.learningprofile
-    chosen_subject = profile.chosen_subject
-    difficulty_level = profile.difficulty_level
-
-    topics = Topic.objects.filter(
-        subject = chosen_subject,
-        difficulty_level = difficulty_level
-    ).order_by('order')
-
-    print("Profile subject:", profile.chosen_subject)
-    print("Profile difficulty:", profile.difficulty_level)
-    
-    return render(request, 'topic_list.html', {'profile' : profile, 'topics': topics})
+import asyncio
     
 @login_required
 def topic_detail_view(request, topic_id):
@@ -30,8 +14,8 @@ def topic_detail_view(request, topic_id):
 
     lessons = Lesson.objects.filter(topic = topic) 
 
-    if not lessons.exists():
-        generate_lessons_task.delay(topic.id)
+    if lessons.count() != 4:
+        generate_lessons_task.delay(topic.id) 
         lessons_ready = False
     else:
         lessons_ready = True
@@ -85,11 +69,9 @@ def mark_lesson_completed(request, lesson_id):
 
 @login_required
 def check_lessons_status(request, topic_id):
-    topic = Topic.objects.get(id=topic_id)
-    lessons_count = Lesson.objects.filter(topic=topic).count()
-    
-    data = {
-        "ready": lessons_count == 4,
-        "lessons_count": lessons_count,
-    }
-    return JsonResponse(data)
+    topic = Topic.objects.get(id = topic_id)
+    lessons_count = Lesson.objects.filter(topic__id=topic_id).count()
+    return JsonResponse({"ready": lessons_count == 4 and topic.status == "ready",
+        "count": lessons_count,
+        "error": topic.status == "not ready",
+        "error_message": topic.error_message,})

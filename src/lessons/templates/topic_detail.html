@@ -3,12 +3,10 @@
 <!-- leave it -->
 {% block content%} {% if not lessons_ready %}
 <div id="lesson-container">
-  {% if not lessons %}
   <div class="loader">
     <div class="spinner"></div>
     <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
   </div>
-  {% else %} {% include "partials/lesson_list.html" %} {% endif %}
 </div>
 
 <script>
@@ -20,7 +18,17 @@
         const response = await fetch(`/topic/${topicId}/status/`);
         const data = await response.json();
 
+        if (data.error) {
+          clearInterval(interval);
+          const msg = encodeURIComponent(
+            "An error occured with AI, please try again later."
+          );
+          window.location.href = `/profile/?error=${msg}`;
+          return;
+        }
+
         if (data.ready) {
+          clearInterval(interval);
           window.location.reload(); // ✅ Reload full page when lessons are ready
         }
       } catch (err) {
@@ -28,8 +36,8 @@
       }
     }
 
-    // check every 5 seconds
-    const interval = setInterval(checkStatus, 5000);
+    // check every 8 seconds
+    const interval = setInterval(checkStatus, 8000);
   });
 </script>
 

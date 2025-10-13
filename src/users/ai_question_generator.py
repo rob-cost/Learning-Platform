@@ -25,7 +25,7 @@ class AssessmentQuestions(BaseModel):
 
 # PROBLEM: QUESTIONS ARE REGENERATED IN RETAKE ASSESSMENT AT EVERY PAGE RELOAD
 def generate_difficulty_questions(subject, is_retake = False):
-
+    
     existing_questions = DifficultyQuestions.objects.filter(subject = subject)
     
     if existing_questions.count() == 10 and not is_retake:
@@ -39,7 +39,8 @@ def generate_difficulty_questions(subject, is_retake = False):
                 points = q.points
             )
             pydantic_questions.append(pydantic_q)
-        return pydantic_questions
+        
+        return {'success': True, 'questions': pydantic_questions}
     
     else:
         existing_questions.delete()
@@ -89,11 +90,10 @@ def generate_difficulty_questions(subject, is_retake = False):
                     difficulty_level = question.difficulty_level,
                     points = question.points
                 )
-            
-            return question_data.questions
+            return {'success': True, 'questions': question_data.questions}
         
     
         except Exception as e:
             print(f"❌ Issue with AI question generator: {type(e).__name__}: {e}")
-            return None
+            return {'success': False} 
 

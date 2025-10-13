@@ -28,7 +28,7 @@ def generate_topic (subject):
     if topic_count == 30:
          return None
     
-    if topic_count < 30 :
+    else :
         Topic.objects.filter(subject = subject).delete()
         prompt = f"""Generate a comprehensive learning path for {subject}.
 

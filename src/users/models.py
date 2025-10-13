@@ -30,6 +30,7 @@ class LearningProfile(models.Model):
     #assessment result
     assessment_score = models.PositiveIntegerField(default=0, help_text="from 0 to 100")
     difficulty_level = models.CharField(max_length=13, choices=DIFFICULTY_CHOICES, default='beginner')
+    difficulty_assessment_ready = models.BooleanField(default=False)
     difficulty_assessment_completed = models.BooleanField(default=False)
     difficulty_assessment_date = models.DateTimeField(null=True, blank=True)
 

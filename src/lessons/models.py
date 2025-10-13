@@ -19,6 +19,12 @@ class Topic (models.Model):
     topic_name = models.CharField(max_length=50)
     description = models.TextField()
     order = models.IntegerField(help_text='Order within the difficulty level')
+    status = models.CharField(
+        max_length=20,
+        choices=[("pending", "Pending"), ("ready", "Ready"), ("error", "Error")],
+        default="pending",
+    )
+    error_message = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
