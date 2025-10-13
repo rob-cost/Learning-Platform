@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Topic, Lesson, UserProgress
-from .ai_lesson_generator import generate_lessons_task
+from .ai_lesson_generator import start_lesson_generation
 from django.http import JsonResponse
 import asyncio
     
@@ -15,7 +15,7 @@ def topic_detail_view(request, topic_id):
     lessons = Lesson.objects.filter(topic = topic) 
 
     if lessons.count() != 4:
-        generate_lessons_task(topic.id) 
+        start_lesson_generation(topic.id) 
         lessons_ready = False
     else:
         lessons_ready = True

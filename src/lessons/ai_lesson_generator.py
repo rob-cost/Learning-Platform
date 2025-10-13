@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from utils import config
 import markdown2
 from django.db import transaction
-import asyncio
+import threading
 
 
 load_dotenv()
@@ -150,5 +150,9 @@ def generate_lessons_task(topic_id):
         topic.error_message = str(e)
         topic.save(update_fields=['status', 'error_message'])
         print(f"❌ Issue with AI {e} question generator: {type(e).__name__}: {e}")
+
  
-  
+def start_lesson_generation(topic_id):
+    thread = threading.Thread(target=generate_lessons_task, args=(topic_id,))
+    thread.daemon = True  # Thread will stop when main program exits
+    thread.start()
