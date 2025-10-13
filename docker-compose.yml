@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src:/app/src
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+
+  celery:
+    build: .
+    command: celery -A learningPlatform worker --l info
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+      - web

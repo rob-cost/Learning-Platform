@@ -15,7 +15,7 @@ def topic_detail_view(request, topic_id):
     lessons = Lesson.objects.filter(topic = topic) 
 
     if lessons.count() != 4:
-        generate_lessons_task.delay(topic.id) 
+        generate_lessons_task(topic.id) 
         lessons_ready = False
     else:
         lessons_ready = True
@@ -65,7 +65,6 @@ def mark_lesson_completed(request, lesson_id):
             messages.info(request, f"You already completed '{lesson.lesson_title}'")
         
     return redirect('topic_detail', topic_id = lesson.topic.id )
-
 
 @login_required
 def check_lessons_status(request, topic_id):

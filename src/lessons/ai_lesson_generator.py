@@ -6,7 +6,6 @@ import json
 from dotenv import load_dotenv
 from utils import config
 import markdown2
-from celery import shared_task
 from django.db import transaction
 import asyncio
 
@@ -45,7 +44,7 @@ def markdown_to_html(md_text: str) -> str:
         ]
     ) 
 
-@shared_task
+
 def generate_lessons_task(topic_id):
 
     # problem: more user can access the same topic 
