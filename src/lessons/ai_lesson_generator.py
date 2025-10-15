@@ -45,24 +45,16 @@ def markdown_to_html(md_text: str) -> str:
     ) 
 
 
-def generate_lessons_threading(topic_id):
+def generate_lessons_for_topic(topic_id):
 
     # problem: more user can access the same topic 
     topic = Topic.objects.get(id = topic_id)
 
     try:
-        topic.status = 'pending'
-        topic.error_message = None
-        topic.save(update_fields=['status', 'error_message'])
-
-        lesson_count = Lesson.objects.filter(topic = topic).count()
-    
-        if lesson_count == 4:
-            pass 
         
         with transaction.atomic():
 
-            Lesson.objects.filter(topic = topic).delete()
+            Lesson.objects.filter(topic = topic_id).delete()
             
             prompt = f"""Create 4 comprehensive lessons for the topic: "{topic.topic_name}" 
             
@@ -127,6 +119,10 @@ def generate_lessons_threading(topic_id):
             raw_content = response.choices[0].message.content
             lessons_data = LessonCollection.model_validate(json.loads(raw_content))
 
+            # check numer of lessons created
+            if len(lessons_data.lessons) != 4:
+                raise ValueError(f'Expected 4 lessons but AI created only {len(lessons_data.lessons)}')
+
             for lesson in lessons_data.lessons:
                 html_visual = markdown_to_html(lesson.visual_content)
                 html_hands_on = markdown_to_html(lesson.hands_on_content)
@@ -139,20 +135,20 @@ def generate_lessons_threading(topic_id):
                     lesson_content = {'visual_content': html_visual, 'hands_on_content': html_hands_on, 'reading_content': html_reading}
                 )
 
-
-        topic.status = "ready"
-        topic.save(update_fields=['status']) 
-        print(f"✅ Lessons successfully generated for topic: {topic.topic_name}")
+            # check DB saved the right amount of lessons
+            created_count = Lesson.objects.filter(topic = topic_id).count()
+            if created_count != 4:
+                raise ValueError(f'Database validation failed: {created_count} instead of 4!')
+            
+            print(f"✅ Lessons successfully generated for topic: {topic.topic_name}")
+            return {'successful': True}
         
-                
+    except ValueError as e:
+        print(f"❌ Validation error: {e}")
+        return {'successful': False}
+             
     except Exception as e:
-        topic.status = "not ready"
-        topic.error_message = str(e)
-        topic.save(update_fields=['status', 'error_message'])
         print(f"❌ Issue with AI {e} question generator: {type(e).__name__}: {e}")
+        return {'successful': False}
 
- 
-def start_lesson_generation(topic_id):
-    thread = threading.Thread(target=generate_lessons_threading, args=(topic_id,))
-    thread.daemon = True  # Thread will stop when main program exits
-    thread.start()
+

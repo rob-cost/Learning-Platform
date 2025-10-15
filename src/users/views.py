@@ -110,7 +110,7 @@ def difficulty_assessment_view(request):
 
     if not questions_data['success']:
         messages.error(request, f'Error in generating questions. Please try again later.')
-        return redirect(request, 'login')
+        return redirect('login')
 
     if request.method == "POST":
         form = DifficultyAssessmentForm(questions_data['questions'], request.POST)
@@ -148,7 +148,7 @@ def difficulty_assessment_view(request):
             profile.registration_step = 4
             profile.save()
 
-            generate_topic(chosen_subject)
+            # generate_topic(chosen_subject)
 
             messages.success(request, "Well done you have completed the registration process!")
             return redirect('profile_page') 
@@ -157,11 +157,69 @@ def difficulty_assessment_view(request):
     return render(request, 'difficulty_assessment.html', {'form': form})
 
 @login_required
+def profile_view(request):
+    profile = request.user.learningprofile
+    chosen_subject = profile.chosen_subject
+    difficulty_level = profile.difficulty_level
+
+    error_msg = request.GET.get("error")
+    if error_msg:
+        messages.error(request, error_msg)
+
+    # creates topics if they don'exist yet
+    if Topic.objects.filter(subject = chosen_subject).count() != 30:
+       topic_data = generate_topic(chosen_subject)
+       if not topic_data['success']:
+           messages.error(request, f'There was an error in creating topics, try to log in again')
+           return redirect('login')
+       
+    # display topics in order
+    topics = Topic.objects.filter(
+        subject = chosen_subject,
+        difficulty_level = difficulty_level
+    ).order_by('order')
+
+    # check if a topic has been completed
+    for topic in topics:
+        lessons_topic = Lesson.objects.filter(topic = topic)
+        completed_count = UserProgress.objects.filter(user = request.user, lesson__in = lessons_topic, completed = True ).count()
+        if lessons_topic.count() == completed_count and lessons_topic.count() != 0:
+            topic.is_completed = True
+        else:
+            topic.is_completed = False
+    
+    # calculate progress percentage of user
+    expected_lessons = 40
+    completed_lessons = UserProgress.objects.filter(user = request.user, lesson__topic__in = topics, completed = True).count()
+    progress_percentage = round(completed_lessons / expected_lessons * 100)
+
+    request.session['progress_percentage'] = progress_percentage
+
+    if progress_percentage == 100 and not request.session.get('complete_notified', False):
+        return redirect('next_topic')
+
+    if progress_percentage < 100:
+        request.session.pop('complete_notified', None)
+
+    context = {
+        'profile' : profile,
+        'username' : request.user.username,
+        'topics': topics,
+        "total_lessons": expected_lessons,
+        "completed_lessons": completed_lessons,
+        "progress_percentage": progress_percentage,
+    }
+ 
+    return render(request, 'profile.html', context)
+
+
+ 
+@login_required
 def retake_assessment_view(request):
     profile = request.user.learningprofile
     progress_percentage = request.session.get('progress_percentage')
 
-    if progress_percentage > 5:
+    if progress_percentage > 79:
         request.session["retake_assessment"] = True
         request.session["previous_level"] = profile.difficulty_level
         request.session["previous_score"] = profile.assessment_score
@@ -236,56 +294,6 @@ def landing_view(request):
         LearningProfile.objects.create(user = request.user)
         return redirect('learning_style_assessment')
 
-@login_required
-def profile_view(request):
-    profile = request.user.learningprofile
-    chosen_subject = profile.chosen_subject
-    difficulty_level = profile.difficulty_level
-
-    error_msg = request.GET.get("error")
-    if error_msg:
-        messages.error(request, error_msg)
-
-    # display topics in order
-    topics = Topic.objects.filter(
-        subject = chosen_subject,
-        difficulty_level = difficulty_level
-    ).order_by('order')
-
-
-    # check if a topic has been completed
-    for topic in topics:
-        lessons_topic = Lesson.objects.filter(topic = topic)
-        completed_count = UserProgress.objects.filter(user = request.user, lesson__in = lessons_topic, completed = True ).count()
-        if lessons_topic.count() == completed_count and lessons_topic.count() != 0:
-            topic.is_completed = True
-        else:
-            topic.is_completed = False
-    
-    
-    # calculate progress percentage of user
-    expected_lessons = 40
-    completed_lessons = UserProgress.objects.filter(user = request.user, lesson__topic__in = topics, completed = True).count()
-    progress_percentage = round(completed_lessons / expected_lessons * 100)
-
-    request.session['progress_percentage'] = progress_percentage
-
-    if progress_percentage == 100 and not request.session.get('complete_notified', False):
-        return redirect('next_topic')
-
-    if progress_percentage < 100:
-        request.session.pop('complete_notified', None)
-
-    context = {
-        'profile' : profile,
-        'username' : request.user.username,
-        'topics': topics,
-        "total_lessons": expected_lessons,
-        "completed_lessons": completed_lessons,
-        "progress_percentage": progress_percentage,
-    }
- 
-    return render(request, 'profile.html', context)
 
 @login_required
 def next_topic_view(request):
@@ -311,7 +319,6 @@ def next_topic_view(request):
     }
     return render(request, 'next_topic.html', context)
     
-
 def logout_view(request):
     logout(request)
     messages.success(request, 'You have successfuly logged out!')

@@ -1,18 +1,34 @@
 <!DOCTYPE html>
 {% extends "base.html" %} {% block title %}Login{% endblock %}
 <!-- leave it -->
-{% block content%} {% if not lessons_ready %}
-<div id="lesson-container">
-  <div class="loader">
-    <div class="spinner"></div>
-    <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
-  </div>
+{% block content%}
+
+<div id="lesson-container"></div>
+<a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
+
+<div class="header">
+  <h1>{{ topic.topic_name }}</h1>
+  <p>{{ topic.description }}</p>
 </div>
 
-<script>
+{% for lesson in lessons %}
+<a href="{% url 'lesson_detail' lesson.id %}">
+  <div
+    class="lesson-card {% if lesson.id in completed_lessons %}completed{% endif %}"
+  >
+    <div class="lesson-number">Lesson {{ lesson.order }}</div>
+    <div class="lesson-title">{{ lesson.lesson_title }}</div>
+    <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
+  </div>
+</a>
+
+{% endfor %} {% endblock %}
+
+<!-- <script>
   document.addEventListener("DOMContentLoaded", function () {
     const topicId = "{{ topic.id }}";
 
+    // Polling JS function
     async function checkStatus() {
       try {
         const response = await fetch(`/topic/${topicId}/status/`);
@@ -39,145 +55,9 @@
     // check every 8 seconds
     const interval = setInterval(checkStatus, 8000);
   });
-</script>
-
-{% else %}
-<a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
-
-<div class="header">
-  <h1>{{ topic.topic_name }}</h1>
-  <p>{{ topic.description }}</p>
-</div>
-
-{% for lesson in lessons %}
-<a href="{% url 'lesson_detail' lesson.id %}">
-  <div
-    class="lesson-card {% if lesson.id in completed_lessons %}completed{% endif %}"
-  >
-    <div class="lesson-number">Lesson {{ lesson.order }}</div>
-    <div class="lesson-title">{{ lesson.lesson_title }}</div>
-    <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
-  </div>
-</a>
-
-{% endfor %} {% endif %} {% endblock %}
-<!-- <style>
-      :root {
-        --primary-color: #2ecc71;
-        --primary-hover: #27ae60;
-        --secondary-color: #2196f3;
-        --background: #f4f6f5;
-        --text-color: #333;
-        --subtext-color: #666;
-        --border-radius: 12px;
-        --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      }
-
-      body {
-        font-family: "Inter", Arial, sans-serif;
-        background-color: var(--background);
-        background: url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1950&q=80")
-          no-repeat center center fixed;
-        background-size: cover;
-        margin: 0;
-        padding: 40px 20px;
-        color: var(--text-color);
-      }
-
-      body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(244, 246, 245, 0.9);
-        z-index: -1;
-      }
-
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .topicdetail-container {
-        max-width: 900px;
-        margin: 0 auto;
-      }
-
-      .back-link {
-        display: inline-block;
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        font-weight: 500;
-      }
-
-      .header {
-        background: white;
-        padding: 25px 30px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        margin-bottom: 30px;
-      }
-
-      h1 {
-        margin: 0 0 10px;
-        font-size: 28px;
-        color: var(--text-color);
-      }
-
-      p {
-        margin: 5px 0;
-        font-size: 16px;
-        color: var(--subtext-color);
-      }
-
-      .lesson-card {
-        background: white;
-        padding: 20px 25px;
-        margin-bottom: 15px;
-        border-radius: var(--border-radius);
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-
-      .lesson-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
-      }
-
-      .lesson-number {
-        color: var(--secondary-color);
-        font-weight: 600;
-        font-size: 14px;
-      }
-
-      .lesson-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin: 8px 0;
-      }
-
-      .lesson-duration {
-        font-size: 14px;
-        color: var(--subtext-color);
-      }
-
-      @media (max-width: 768px) {
-        body {
-          padding: 20px;
-        }
-
-        h1 {
-          font-size: 24px;
-        }
-
-        .header {
-          padding: 20px;
-        }
-
-        .lesson-card {
-          padding: 18px;
-        }
-      }
-    </style> -->
+</script> -->
+<!-- 
+<div class="loader">
+  <div class="spinner"></div>
+  <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
+</div> -->

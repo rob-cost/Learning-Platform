@@ -1,1 +1,1 @@
-MODEL="openai/gpt-oss-20b"
+MODEL="openai/gpt-oss-120b" 

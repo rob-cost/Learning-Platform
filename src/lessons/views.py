@@ -3,28 +3,32 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Topic, Lesson, UserProgress
-from .ai_lesson_generator import start_lesson_generation
+from .ai_lesson_generator import generate_lessons_for_topic
 from django.http import JsonResponse
 import asyncio
     
 @login_required
 def topic_detail_view(request, topic_id):
-    topic = Topic.objects.get(id=topic_id)
+    topic = Topic.objects.get(id = topic_id)
     completed_lessons = UserProgress.objects.filter(user = request.user, completed = True).values_list('lesson_id', flat=True)
 
-    lessons = Lesson.objects.filter(topic = topic) 
+    lessons = Lesson.objects.filter(topic_id = topic_id) 
 
     if lessons.count() != 4:
-        start_lesson_generation(topic.id) 
-        lessons_ready = False
-    else:
-        lessons_ready = True
+        result = generate_lessons_for_topic(topic_id)  # Generate lessons
 
+        # Exit in case of error
+        if not result['successful']:
+            messages.error(request, f'There was an error with AI, please try again later.')
+            return redirect('profile_page')
+    
+        topic = Topic.objects.get(id=topic_id)  # Re-take the new topic (new status)
+        lessons = Lesson.objects.filter(topic_id=topic_id)  # Re-take created lessons
+    
     context = {
         'topic': topic, 
         'lessons': lessons, 
         'completed_lessons': completed_lessons,
-        'lessons_ready': lessons_ready
     }
     return render(request, 'topic_detail.html', context )
 
