@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from .assessment_data import ASSESSMENT_QUESTIONS
@@ -204,6 +204,8 @@ def level_choice_view(request):
     }
     return render(request, 'level_choice.html', context )
 
+
+
 def signup_view(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -309,7 +311,11 @@ def next_topic_view(request):
     }
     return render(request, 'next_topic.html', context)
     
-   
-  
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, 'You have successfuly logged out!')
+    return redirect('login')
+
     
     

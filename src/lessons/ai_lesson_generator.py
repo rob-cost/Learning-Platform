@@ -45,7 +45,7 @@ def markdown_to_html(md_text: str) -> str:
     ) 
 
 
-def generate_lessons_task(topic_id):
+def generate_lessons_threading(topic_id):
 
     # problem: more user can access the same topic 
     topic = Topic.objects.get(id = topic_id)
@@ -153,6 +153,6 @@ def generate_lessons_task(topic_id):
 
  
 def start_lesson_generation(topic_id):
-    thread = threading.Thread(target=generate_lessons_task, args=(topic_id,))
+    thread = threading.Thread(target=generate_lessons_threading, args=(topic_id,))
     thread.daemon = True  # Thread will stop when main program exits
     thread.start()

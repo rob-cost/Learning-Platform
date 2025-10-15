@@ -7,7 +7,10 @@
 
   <div class="navbar-links">
     <a href="{% url 'profile_page' %}">Profile</a>
-    <a href="{% url 'login' %}">Logout</a>
+    <form method="post" action="{% url 'logout' %}" style="display: inline">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+    </form>
   </div>
 </nav>
 
