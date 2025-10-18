@@ -24,7 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bqzl!-a1#7$x$4k5o!nb2085fe)i77*xb)@(rq(%+ux#io!3=('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG', 0)))
+# Use it like that for deployment
+# DEBUG = bool(int(os.environ.get('DEBUG', 0)))
+
+DEBUG = True
 
 #AUTH
 LOGIN_URL='/login/'
@@ -83,9 +86,17 @@ ASGI_APPLICATION = 'learningPlatform.asgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'learning_platform',
+        'USER': 'roberto',
+        'PASSWORD': 'microkorgmachine',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -135,4 +146,9 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Celery
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from typing import List
 
 SUBJECT_CHOICES = [
         ('programming', 'Programming and software development'),
@@ -16,15 +17,9 @@ DIFFICULTY_CHOICES = [
 class Topic (models.Model):
     subject = models.CharField(max_length= 50, choices=SUBJECT_CHOICES)
     difficulty_level = models.CharField(max_length=50, choices=DIFFICULTY_CHOICES)
-    topic_name = models.CharField(max_length=50)
+    topic_name = models.CharField(max_length=100)
     description = models.TextField()
     order = models.IntegerField(help_text='Order within the difficulty level')
-    status = models.CharField(
-        max_length=20,
-        choices=[("pending", "Pending"), ("ready", "Ready"), ("error", "Error")],
-        default="pending",
-    )
-    error_message = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -7,25 +7,27 @@ from dotenv import load_dotenv
 from utils import config
 import markdown2
 from django.db import transaction
-import threading
+from celery import shared_task
+import asyncio
 
 
 load_dotenv()
 
 client = Groq()
 
-class LessonContent(BaseModel):
-    visual_content: str
-    hands_on_content: str
-    reading_content: str
+# class LessonContent(BaseModel):
+#     visual_content: str
+#     hands_on_content: str
+#     reading_content: str
 
 class SingleLesson(BaseModel):
     lesson_title: str
     order: int
-    visual_content: str     
-    hands_on_content: str   
-    reading_content: str    
+    content: str
     estimated_duration: int
+    # visual_content: str     
+    # hands_on_content: str   
+    # reading_content: str    
 
 class LessonCollection(BaseModel):
     subject: str
@@ -61,46 +63,41 @@ def generate_lessons_for_topic(topic_id):
                         Subject: {topic.subject}
                         Difficulty Level: {topic.difficulty_level}
 
-                        For each lesson, provide content in THREE distinct learning styles:
+                        Instructions:
+                        - Produce lessons that build progressively in difficulty and depth.
+                        - Each lesson must have:
+                        • A clear and engaging title.
+                        • Number lessons sequentially (order: 1, 2, 3, 4)
+                        • Ensure logical progression across the 4 lessons
+                        • A single unified content block (can be sub-divided in chapters).
+                        • The content should be detailed, educational, and cohesive.
+                        - Each lesson's content must be at least **1000 words** long.
+                        - Content must include:
+                        • Clear explanations of key ideas and concepts.
+                        • At least 3 real-world examples relevant to the topic.
+                        • Optional code snippets or applied demonstrations if relevant to the subject.
+                        • Smooth transitions and logical flow suitable for {topic.difficulty_level} learners.
+                        - Use valid Markdown for formatting (headings, lists, bold, italics, code blocks).
+                        - Wrap code in triple backticks ``` with the language name, and do NOT escape newlines or Markdown characters.
+                        - The tone should be clear, engaging, and instructive, as if written by an expert educator.
+                        - Each lesson should take approximately 15–40 minutes to complete.
 
-                        1. VISUAL_CONTENT:
-                        - Diagrams, charts, or visual metaphors (described in text)
-                        - Step-by-step visual breakdowns
-                        - Conceptual illustrations
-                        - Use clear headers and bullet points for visual scanning
-                        - Start with a clear overview diagram description
-                        - Include 3-4 visual examples or metaphors
-                        - Provide step-by-step visual breakdowns
+                        Provide clear, engaging content that works for different learning preferences.
+                        Return the data strictly in JSON format matching this structure:
 
-                        2. HANDS_ON_CONTENT:
-                        - Practical exercises and activities
-                        - Code examples (for programming) or practice problems
-                        - Interactive challenges
-                        - Real-world application tasks
-                        - "Try this" activities
-
-                        3. READING_CONTENT:
-                        - Detailed theoretical explanations
-                        - In-depth analysis and context
-                        - Background information
-                        - Comprehensive written descriptions
-                        - Key concepts and definitions
-
-                        Requirements:
-                        - Each lesson must contain ALL three content types
-                        - Each content section should be at least 300-500 words
-                        - Provide comprehensive, detailed explanations with multiple examples
-                        - Ensure logical progression across the 4 lessons
-                        - Include at least 3 concrete, real-world examples for each concept
-                        - Provide code snippets with detailed line-by-line explanations
-                        - Make content appropriate for {topic.difficulty_level} level
-                        - Each lesson should take approximately from 20 to 50 minutes to complete
-                        - Number lessons sequentially (order: 1, 2, 3, 4)
-                        - Use valid Markdown for headings, lists, bold, italics, and code blocks
-                        - Code blocks: wrap code in triple backticks ``` with language, do NOT escape newlines
-                        - Do NOT escape Markdown characters (no `\\n`, `\\` for backticks)
-
-                        Provide clear, engaging content that works for different learning preferences."""
+                        LessonCollection = {{
+                        "subject": "{topic.subject}",
+                        "lessons": [
+                            {{
+                            "lesson_title": "<string>",
+                            "order": <1-4>,
+                            "content": "<Markdown-formatted string, at least 1000 words>",
+                            "estimated_duration": <integer between 10 and 50>
+                            }},
+                            ...
+                        ]
+                        }}
+                        """
             response = client.chat.completions.create(
             model=config.MODEL,
                 messages=[
@@ -119,36 +116,39 @@ def generate_lessons_for_topic(topic_id):
             raw_content = response.choices[0].message.content
             lessons_data = LessonCollection.model_validate(json.loads(raw_content))
 
-            # check numer of lessons created
-            if len(lessons_data.lessons) != 4:
-                raise ValueError(f'Expected 4 lessons but AI created only {len(lessons_data.lessons)}')
+            lessons = lessons_data.lessons
 
-            for lesson in lessons_data.lessons:
-                html_visual = markdown_to_html(lesson.visual_content)
-                html_hands_on = markdown_to_html(lesson.hands_on_content)
-                html_reading = markdown_to_html(lesson.reading_content)
-                Lesson.objects.create(
-                    topic = topic,
-                    lesson_title = lesson.lesson_title,
-                    order = lesson.order,
-                    estimated_duration = lesson.estimated_duration,
-                    lesson_content = {'visual_content': html_visual, 'hands_on_content': html_hands_on, 'reading_content': html_reading}
+            if len(lessons) != 4:
+                return {'successful': False, 'reason': f'Expected 4 lessons, got {len(lessons)}'}
+
+           
+            lesson_objects = [
+                Lesson(
+                    topic=topic,
+                    lesson_title=lesson.lesson_title,
+                    order=lesson.order,
+                    estimated_duration=lesson.estimated_duration,
+                    lesson_content=markdown_to_html(lesson.content)
                 )
+                for lesson in lessons
+            ]
 
-            # check DB saved the right amount of lessons
-            created_count = Lesson.objects.filter(topic = topic_id).count()
-            if created_count != 4:
-                raise ValueError(f'Database validation failed: {created_count} instead of 4!')
-            
-            print(f"✅ Lessons successfully generated for topic: {topic.topic_name}")
+            Lesson.objects.bulk_create(lesson_objects)
             return {'successful': True}
-        
-    except ValueError as e:
-        print(f"❌ Validation error: {e}")
-        return {'successful': False}
-             
+
     except Exception as e:
-        print(f"❌ Issue with AI {e} question generator: {type(e).__name__}: {e}")
-        return {'successful': False}
+        return {'successful': False, 'reason': str(e)}
+
+
+@shared_task (bind=True, max_retries=3, default_retry_delay=240)
+def generate_lessons_task(self, topic_id):
+    result = generate_lessons_for_topic(topic_id)
+    if not result ['successful']:
+        reason = result.get('reason', 'Unknown failure')
+        print(f"❌ Task failed for topic {topic_id}: {reason}")
+        raise self.retry(exc=Exception(reason))
+
+    print(f"✅ Lessons successfully generated for topic {topic_id}")
+    return result
 
 

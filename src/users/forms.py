@@ -1,41 +1,7 @@
 from django import forms
-from .assessment_data import ASSESSMENT_QUESTIONS
-from .models import SUBJECT_CHOICES, LearningProfile
-from .ai_question_generator import generate_difficulty_questions
+from .models import SUBJECT_CHOICES
+from django.contrib.auth.models import User
 
-class LearningStyleAssessmentForm (forms.Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for question in ASSESSMENT_QUESTIONS:
-            choices= []
-            for i, option in enumerate(question['options']):
-                choices.append((i, option['text']))
-
-            field_name = f"question_{question['id']}"
-            self.fields[field_name] = forms.ChoiceField(
-                label=question['question'],
-                choices=choices,
-                widget=forms.RadioSelect,
-                required=True,
-                error_messages={'required': f'Please answer question {question["id"]}.'}
-            )
-
-    def get_user_answers(self):
-        if not self.is_valid():
-            return None
-        
-        user_answers = []
-        for question in ASSESSMENT_QUESTIONS:
-            field_name =f"question_{question['id']}"
-            selected_option = int(self.cleaned_data[field_name])
-            
-            user_answers.append({
-                'question_id': question['id'],
-                'selected_option': selected_option
-            })
-        
-        return user_answers
     
 class SubjectSelectionForm(forms.Form):
     chosen_subject = forms.ChoiceField(
@@ -97,6 +63,15 @@ class DifficultyAssessmentForm(forms.Form):
         assessment_score = round((score*100)/max_score)
         return assessment_score
 
-
+class ProfileSettingsForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs:={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs:={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs:={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs:={'class': 'form-control'}),
+        }
             
             

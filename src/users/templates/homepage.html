@@ -1,0 +1,37 @@
+{% extends "base.html" %} {% block title %}Welcome to
+LearningPlatform{%endblock%} {% block content %}
+
+<div class="homepage-container">
+  <div class="hero-section">
+    <h1>Welcome to LearningPlatform</h1>
+    <p class="hero-description">
+      A multidisciplinary platform designed to keep you entertained while
+      learning something new every day. It gives you a complete learning path of
+      a particular subject with personalized lessons.
+    </p>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📚</div>
+        <p>Personalized Learning</p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🎯</div>
+        <p>Complete Learning Paths</p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🚀</div>
+        <p>Learn Every Day</p>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <a href="{% url 'profile_page' %}" class="cta-button">Go to Your Profile</a>
+    {% else %}
+    <a href="{% url 'signup' %}" class="cta-button">Start Learning Now</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

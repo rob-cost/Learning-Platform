@@ -1,5 +1,6 @@
 from groq import Groq
 from pydantic import BaseModel
+from enum import Enum
 from .models import Topic
 from typing import List
 import json
@@ -7,21 +8,29 @@ from dotenv import load_dotenv
 from .models import Topic
 from utils import config
 from django.db import transaction
+from .ai_lesson_generator import generate_lessons_task
+import asyncio
+import json
+from learningPlatform.celery import app 
 
 load_dotenv()
 
 client = Groq()
 
+class LevelEnum(str, Enum):
+    beginner = 'beginner'
+    intermediate = 'intermediate'
+    advanced = 'advanced'
+
 class SingleTopic(BaseModel):
+    subject: str
     topic_name : str
     description: str
     order: int
+    level: LevelEnum
 
 class CollectionsTopics(BaseModel):
-     subject: str
-     beginner_topics: List[SingleTopic]
-     intermediate_topics: List[SingleTopic]
-     advanced_topics: List[SingleTopic]
+     topics: List[SingleTopic]
 
 def generate_topic (subject):
 
@@ -41,11 +50,14 @@ def generate_topic (subject):
         - topic_name: Clear, descriptive title
         - description: 2-3 sentence explanation of what will be covered
         - order: Sequential number within that difficulty level (1-10)
+        - subject: {subject}
+        - level: Should be either of these values [beginner, intermediate, advanced]
 
-        Structure your response with three separate lists: beginner_topics, intermediate_topics, and advanced_topics."""
+        """
 
             response = client.chat.completions.create(
                         model=config.MODEL,
+
                         messages=[
                             {"role": "system", "content": "You are an expert educator creating topics for lessons."},
                             {
@@ -65,36 +77,39 @@ def generate_topic (subject):
                 
             raw_content = response.choices[0].message.content
             topic_data = CollectionsTopics.model_validate(json.loads(raw_content))
-            print(f'Topic data: {topic_data}')
-            for topic in topic_data.beginner_topics:
-                Topic.objects.create(
-                    subject = subject,
-                    topic_name = topic.topic_name,
-                    description = topic.description,
-                    order = topic.order,
-                    difficulty_level = 'beginner'
+
+            topics_to_create = [
+                Topic(
+                    subject=single.subject,
+                    topic_name=single.topic_name,
+                    description=single.description,
+                    difficulty_level=single.level.value,  # if LevelEnum maps to difficulty_level
+                    order=single.order
                 )
-            for topic in topic_data.intermediate_topics:
-                Topic.objects.create(
-                    subject = subject,
-                    topic_name = topic.topic_name,
-                    description = topic.description,
-                    order = topic.order,
-                    difficulty_level = 'intermediate'
-                )
-            for topic in topic_data.advanced_topics:
-                Topic.objects.create(
-                    subject = subject,
-                    topic_name = topic.topic_name,
-                    description = topic.description,
-                    order = topic.order,
-                    difficulty_level = 'advanced'
-                )
-            return {'success': True, 'topic_data': topic_data}
+                for single in topic_data.topics
+            ]
+
+            saved_topics = Topic.objects.bulk_create(topics_to_create)
+            print(f'Saved topics: {saved_topics}')
+
+
+            if len(saved_topics) == 30:
+                # Collect topic IDs BEFORE the transaction commits
+                topic_ids = [topic.id for topic in saved_topics]
+                
+                # Schedule tasks using the correct app instance
+                def schedule_tasks():
+                    for tid in topic_ids:
+                        app.send_task(
+                            'lessons.ai_lesson_generator.generate_lessons_task',
+                            args=[tid]
+                        )
+                
+                transaction.on_commit(schedule_tasks)
+
+            return {'success': True, 'topic_data': saved_topics}
 
     except Exception as e:
             print(f"❌ Issue with AI topic generator: {type(e).__name__}: {e}")
             return {'success': False}
-
-
 
