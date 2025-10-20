@@ -3,52 +3,49 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Topic, Lesson, UserProgress
-from .ai_lesson_generator import generate_lessons_for_topic
+from .ai_lesson_generator import generate_lessons_task
 from django.http import JsonResponse
 import asyncio
+from django.core.cache import cache
     
 @login_required
 def topic_detail_view(request, topic_id):
     topic = Topic.objects.get(id = topic_id)
-    completed_lessons = UserProgress.objects.filter(user = request.user, completed = True).values_list('lesson_id', flat=True)
-
     lessons = Lesson.objects.filter(topic_id = topic_id) 
 
-    if lessons.count() != 4:
-        result = generate_lessons_for_topic(topic_id)  # Generate lessons
-
-        # Exit in case of error
-        if not result['successful']:
-            messages.error(request, f'There was an error with AI, please try again later.')
-            return redirect('profile_page')
+    completed_lessons = UserProgress.objects.filter(user = request.user, completed = True).values_list('lesson_id', flat=True)
     
-        topic = Topic.objects.get(id=topic_id)  # Re-take the new topic (new status)
-        lessons = Lesson.objects.filter(topic_id=topic_id)  # Re-take created lessons
+    lessons_exist = lessons.count() == 4
+
+    generate_lessons_task.delay(topic_id)
     
     context = {
         'topic': topic, 
         'lessons': lessons, 
         'completed_lessons': completed_lessons,
+        'lessons_exist': lessons_exist
     }
     return render(request, 'topic_detail.html', context )
 
 @login_required
+def check_lessons_status(request, topic_id):
+    try:
+        lessons_count = Lesson.objects.filter(topic__id=topic_id).count()
+        print(f'lessons n: {lessons_count}')
+        error = cache.get(f'lessons_for_topic_{topic_id}')
+        if not error and lessons_count != 4:
+            return JsonResponse({'error': 'Lessons not ready'})
+        return JsonResponse({"ready": lessons_count == 4})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
+    
+@login_required
 def lesson_detail_view(request, lesson_id):
     lesson = Lesson.objects.get(id=lesson_id)
-    profile = request.user.learningprofile
- 
-    learning_styles = {
-        'visual': profile.visual_learning_score,
-        'hands_on': profile.hands_on_learning_score,
-        'reading': profile.reading_learning_score
-    }
-
-    dominant_style = max(learning_styles, key=learning_styles.get)
 
     context = {
         'lesson': lesson,
         'topic': lesson.topic,
-        'dominant_style': dominant_style,
     }
     
     return render(request, 'lesson_detail.html', context)
@@ -70,11 +67,5 @@ def mark_lesson_completed(request, lesson_id):
         
     return redirect('topic_detail', topic_id = lesson.topic.id )
 
-@login_required
-def check_lessons_status(request, topic_id):
-    topic = Topic.objects.get(id = topic_id)
-    lessons_count = Lesson.objects.filter(topic__id=topic_id).count()
-    return JsonResponse({"ready": lessons_count == 4 and topic.status == "ready",
-        "count": lessons_count,
-        "error": topic.status == "not ready",
-        "error_message": topic.error_message,})
+
+    

@@ -4,7 +4,19 @@ from django.contrib.auth.models import User
 SUBJECT_CHOICES = [
         ('programming', 'Programming and software development'),
         ('music', 'Musical theory and composition'),
-        ('art', 'Art history and art crafting')
+        ('art', 'Art history and art crafting'),
+        ('mathematics', 'Mathematics and problem solving'),
+        ('languages', 'Foreign languages and linguistics'),
+        ('science', 'Natural sciences and physics'),
+        ('business', 'Business and entrepreneurship'),
+        ('cooking', 'Cooking and culinary arts'),
+        ('photography', 'Photography and visual media'),
+        ('fitness', 'Fitness and exercise science'),
+        ('philosophy', 'Philosophy and critical thinking'),
+        ('history', 'World history and civilization'),
+        ('psychology', 'Psychology and human behavior'),
+        ('design', 'Graphic design and UI/UX'),
+        ('marketing', 'Digital marketing and social media'),
     ]
 
 DIFFICULTY_CHOICES = [
@@ -18,11 +30,6 @@ class LearningProfile(models.Model):
 
     #user profile
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    #points for each learning method style
-    visual_learning_score = models.PositiveIntegerField(default=0)
-    hands_on_learning_score = models.PositiveIntegerField(default=0)
-    reading_learning_score = models.PositiveIntegerField(default=0)
 
     #choose a subject
     chosen_subject = models.CharField(max_length=50, choices=SUBJECT_CHOICES)

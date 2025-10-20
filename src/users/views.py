@@ -12,6 +12,7 @@ from lessons.models import Topic, Lesson, UserProgress
 from .ai_question_generator import generate_difficulty_questions
 from lessons.ai_topic_generator import generate_topic
 from django.http import JsonResponse
+from learningPlatform.celery import app
 
 user_answers = []
 
@@ -58,6 +59,7 @@ def profile_view(request):
     chosen_subject = profile.chosen_subject
     difficulty_level = profile.difficulty_level
 
+    # get error mess from request
     error_msg = request.GET.get("error")
     if error_msg:
         messages.error(request, error_msg)
@@ -66,7 +68,7 @@ def profile_view(request):
     if Topic.objects.filter(subject = chosen_subject).count() != 30:
        topic_data = generate_topic(chosen_subject)
        if not topic_data['success']:
-           messages.error(request, f'There was an error in creating topics, try to log in again')
+           messages.error(request, f'Error in creating topics, try again later')
            return redirect('login')
        
     # display topics in order
@@ -74,9 +76,10 @@ def profile_view(request):
         subject = chosen_subject,
         difficulty_level = difficulty_level
     ).order_by('order')
+    topics_exist = topics.exists()
 
     # check if a topic has been completed
-    #  chekc if a topi contain all lessons
+    #  chekc if a topic contain all lessons
     for topic in topics:
         lessons_topic = Lesson.objects.filter(topic = topic)
         if lessons_topic.count() == 4:
@@ -104,9 +107,10 @@ def profile_view(request):
         'profile' : profile,
         'username' : request.user.username,
         'topics': topics,
-        "total_lessons": expected_lessons,
-        "completed_lessons": completed_lessons,
-        "progress_percentage": progress_percentage,
+        'total_lessons': expected_lessons,
+        'completed_lessons': completed_lessons,
+        'progress_percentage': progress_percentage,
+        'topics_exist': topics_exist
     }
  
     return render(request, 'profile.html', context)
@@ -177,6 +181,10 @@ def subject_selection_view(request):
             profile.registration_step = 2
             profile.save()
 
+            # Starts creating topics in the background
+            app.send_task('lessons.ai_topic_generator.generate_topic', args=[chosen_subject])
+            
+
             return redirect('difficulty_assessment') 
     
     else:
@@ -195,7 +203,7 @@ def difficulty_assessment_view(request):
     questions_data = generate_difficulty_questions(chosen_subject, is_retake)
 
     if not questions_data['success']:
-        messages.error(request, f'Error in generating questions. Please try again later.')
+        messages.error(request, f'Error in generating assessment. Please try again later.')
         return redirect('login')
 
     if request.method == "POST":
@@ -234,8 +242,6 @@ def difficulty_assessment_view(request):
             profile.registration_step = 3
             profile.save()
 
-            # generate_topic(chosen_subject)
-
             messages.success(request, "Well done you have completed the registration process!")
             return redirect('profile_page') 
     else:
@@ -254,7 +260,7 @@ def retake_assessment_view(request):
 
         return redirect('difficulty_assessment')
     else:
-        messages.info(request, f'You need to complete at least 80% of the program')
+        messages.info(request, f'Complete at least 80% of the program')
         return redirect('profile_page')
 
 @login_required
@@ -315,7 +321,14 @@ def next_topic_view(request):
     return render(request, 'next_topic.html', context)
     
 
-
+@login_required
+def check_topic_status(request):
+    try:
+        profile = request.user.learningprofile
+        topic = Topic.objects.filter(subject = profile.chosen_subject, difficulty_level = profile.difficulty_level)
+        return JsonResponse({"ready": topic.count() == 10})
+    except Exception as e:
+        return JsonResponse({"error": str(e) })
     
 class CustomPasswordChangeView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'password_change.html'

@@ -45,20 +45,17 @@ def generate_difficulty_questions(subject, is_retake = False):
     else:
         existing_questions.delete()
     
-        subject_prompt = {
-            'programming': """ Generate 10 multiple choice questions to assess programming knowledge level. 
-            Include questions covering: basic syntax, variables, functions, loops, and problem-solving. 
-            Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
-            Each question should have exactly 4 options.""",
-            'music': """ Generate 10 multiple choice questions to assess musical theory and composition knowledge.
-            Include questions covering: notes, scales, rhythm, harmony, and basic composition.
-            Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
-            Each question should have exactly 4 options.""",
-            'art': """Generate 10 multiple choice questions to assess art history and crafting knowledge.
-            Include questions covering: color theory, famous artists, techniques, art periods, and composition.
-            Mix difficulty levels: 2 beginner (2 points each), 2 intermediate (3 points each), 1 advanced (4 points).
-            Each question should have exactly 4 options."""
-        }
+        prompt = f"""Generate 10 multiple choice questions to assess knowledge level in {subject}.
+        
+        Create questions that cover the breadth of {subject}, including fundamental concepts, 
+        practical applications, and advanced topics appropriate to the field.
+        
+        Requirements:
+        - Total: 10 questions
+        - Difficulty distribution: 4 beginner (2 points each), 4 intermediate (3 points each), 2 advanced (4 points each)
+        - Each question must have exactly 4 answer options
+        - Questions should progressively test understanding from basic to advanced concepts
+        - Ensure questions are clear, unambiguous, and have one definitively correct answer"""
 
         try:
             print(f"Generating questions for {subject}")
@@ -68,7 +65,7 @@ def generate_difficulty_questions(subject, is_retake = False):
                     {"role": "system", "content": "You are an expert educator creating assessment questions."},
                     {
                         "role": "user",
-                        "content": subject_prompt[subject],
+                        "content": prompt,
                     },
                 ],
                 response_format={
@@ -81,6 +78,7 @@ def generate_difficulty_questions(subject, is_retake = False):
             )
             raw_content = response.choices[0].message.content
             question_data = AssessmentQuestions.model_validate(json.loads(raw_content))
+            print(f'Question_data: {question_data}')
             for question in question_data.questions:
                 DifficultyQuestions.objects.create(
                     subject = subject,

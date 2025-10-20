@@ -1,6 +1,11 @@
 {% extends "base.html" %} {% block title %}Profile Page{% endblock %}
 <!-- leave it -->
-{% block content%}
+{% block content%} {% if not topics_exist %}
+<div class="loader">
+  <div class="spinner"></div>
+  <p>Generating profile for {{ username }}. Please wait...</p>
+</div>
+{% else %}
 <nav class="navbar">
   <div class="navbar-logo">Learning-Platform ({{username}})</div>
 
@@ -68,5 +73,37 @@
     </div>
   </div>
 </div>
+{% endif %} {% endblock %} {% block scripts %}
+<!--  -->
+{% if not topics_exist %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Polling JS function
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/profile/status/`);
+        const data = await response.json();
 
-{% endblock %}
+        // if (data.error) {
+        //   clearInterval(interval);
+        //   const msg = encodeURIComponent(
+        //     "An error occured with AI, please try again later."
+        //   );
+        //   window.location.href = `/login/?error=${msg}`;
+        //   return;
+        // }
+
+        if (data.ready) {
+          clearInterval(interval);
+          window.location.reload(); // Reload profile when topics are ready
+        }
+      } catch (err) {
+        console.error("Error checking lesson status:", err);
+      }
+    }
+
+    // check every 8 seconds
+    const interval = setInterval(checkStatus, 3000);
+  });
+</script>
+{% endif %} {% endblock %}

@@ -5,7 +5,19 @@ from typing import List
 SUBJECT_CHOICES = [
         ('programming', 'Programming and software development'),
         ('music', 'Musical theory and composition'),
-        ('art', 'Art history and art crafting')
+        ('art', 'Art history and art crafting'),
+        ('mathematics', 'Mathematics and problem solving'),
+        ('languages', 'Foreign languages and linguistics'),
+        ('science', 'Natural sciences and physics'),
+        ('business', 'Business and entrepreneurship'),
+        ('cooking', 'Cooking and culinary arts'),
+        ('photography', 'Photography and visual media'),
+        ('fitness', 'Fitness and exercise science'),
+        ('philosophy', 'Philosophy and critical thinking'),
+        ('history', 'World history and civilization'),
+        ('psychology', 'Psychology and human behavior'),
+        ('design', 'Graphic design and UI/UX'),
+        ('marketing', 'Digital marketing and social media'),
     ]
 
 DIFFICULTY_CHOICES = [

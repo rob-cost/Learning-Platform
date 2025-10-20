@@ -15,5 +15,7 @@ urlpatterns = [
     path('profile-settings/', views.profile_settings_view, name='profile_settings'),
     path('check-username/', views.check_username_availability, name='check_username'),
     path('delete-profile/', views.delete_profile_view, name='delete_profile'),
+    path('profile/status/', views.check_topic_status, name='check_topic_status'),
+
 
 ]

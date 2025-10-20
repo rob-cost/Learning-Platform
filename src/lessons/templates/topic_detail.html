@@ -4,7 +4,12 @@
 <!--  -->
 {% block body_class %}topic-detail-container-body{% endblock %}
 <!-- leave it -->
-{% block content%}
+{% block content%} {% if not lessons_exist %}
+<div class="loader">
+  <div class="spinner"></div>
+  <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
+</div>
+{% else %}
 
 <div id="lesson-container"></div>
 <a href="{% url 'profile_page' %}" class="back-link">← Back to Profile</a>
@@ -24,10 +29,12 @@
     <div class="lesson-duration">{{ lesson.estimated_duration }} minutes</div>
   </div>
 </a>
-
-{% endfor %} {% endblock %}
-
-<!-- <script>
+{% endfor %}
+<!--  -->
+{% endif %} {% endblock %} {% block scripts %}
+<!--  -->
+{% if not lessons_exist %}
+<script>
   document.addEventListener("DOMContentLoaded", function () {
     const topicId = "{{ topic.id }}";
 
@@ -48,19 +55,15 @@
 
         if (data.ready) {
           clearInterval(interval);
-          window.location.reload(); // ✅ Reload full page when lessons are ready
+          window.location.reload();
         }
       } catch (err) {
+        clearInterval(interval);
         console.error("Error checking lesson status:", err);
       }
     }
 
-    // check every 8 seconds
-    const interval = setInterval(checkStatus, 8000);
+    const interval = setInterval(checkStatus, 10000);
   });
-</script> -->
-<!-- 
-<div class="loader">
-  <div class="spinner"></div>
-  <p>Generating lessons for {{ topic.topic_name }}. Please wait...</p>
-</div> -->
+</script>
+{% endif %} {% endblock %}
