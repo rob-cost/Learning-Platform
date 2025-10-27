@@ -1,11 +1,6 @@
 {% extends "base.html" %} {% block title %}Profile Page{% endblock %}
 <!-- leave it -->
-{% block content%} {% if not topics_exist %}
-<div class="loader">
-  <div class="spinner"></div>
-  <p>Generating profile for {{ username }}. Please wait...</p>
-</div>
-{% else %}
+{% block content%}
 <nav class="navbar">
   <div class="navbar-logo">Learning-Platform ({{username}})</div>
 
@@ -62,48 +57,146 @@
       {% if topics %} {% for topic in topics %}
       <a
         href="{% url 'topic_detail' topic.id %}"
-        class="topic-card {% if topic.is_completed %}completed {% elif topic.has_all_lessons %}all-lessons{% endif %}"
+        class="topic-card {% if topic.is_completed %}completed {% endif %}"
+        data-topic-id="{{ topic.id }}"
       >
         <div class="topic-title">{{ topic.topic_name }}</div>
         <div class="topic-description">{{ topic.description }}</div>
+        <div class="topic-status-pending" style="display: none">
+          <span class="generating-spinner"></span>
+          <span class="spinner-text">Generating lessons...</span>
+        </div>
+        <div class="topic-status-failed" style="display: none">
+          <span class="status-text"
+            >Failed to generate lessons. Press to reload</span
+          >
+        </div>
+        <div class="topic-status-success" style="display: none">
+          <span class="status-text">Ready</span>
+        </div>
       </a>
       {% endfor %} {% else %}
-      <p>No topics available yet. Please complete your assessment.</p>
-      {% endif %}
+      <p>No topics available yet. New topics will be generated soon.</p>
     </div>
   </div>
 </div>
 {% endif %} {% endblock %} {% block scripts %}
 <!--  -->
-{% if not topics_exist %}
+<!-- Disable style class for topic card -->
+<style>
+  .topic-card.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+  }
+</style>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Polling JS function
-    async function checkStatus() {
-      try {
-        const response = await fetch(`/profile/status/`);
-        const data = await response.json();
+  let pollInterval = null;
 
-        // if (data.error) {
-        //   clearInterval(interval);
-        //   const msg = encodeURIComponent(
-        //     "An error occured with AI, please try again later."
-        //   );
-        //   window.location.href = `/login/?error=${msg}`;
-        //   return;
-        // }
+  async function checkGenerationStatus() {
+    try {
+      const response = await fetch('{% url "topic_lesson_status" %}');
+      if (!response.ok) throw new Error("Failed to fetch status");
 
-        if (data.ready) {
-          clearInterval(interval);
-          window.location.reload(); // Reload profile when topics are ready
+      const data = await response.json();
+
+      // Check if any topics are still pending
+      const stillPending = data.topics.some(
+        topic => topic.topic_status === "pending"
+      );
+
+      // Update UI for each topic
+      data.topics.forEach(topic => {
+        const topicCard = document.querySelector(
+          `[data-topic-id="${topic.id}"]`
+        );
+
+        if (topicCard) {
+          const pending = topicCard.querySelector(".topic-status-pending");
+          const success = topicCard.querySelector(".topic-status-success");
+          const failed = topicCard.querySelector(".topic-status-failed");
+
+          pending.style.display = "none";
+          success.style.display = "none";
+          failed.style.display = "none";
+
+          if (topic.topic_status === "success") {
+            success.style.display = "flex";
+            topicCard.classList.remove("disabled");
+          } else if (topic.topic_status === "failed") {
+            failed.style.display = "flex";
+            topicCard.classList.remove("disabled");
+          } else if (topic.topic_status === "pending") {
+            pending.style.display = "flex";
+            topicCard.classList.add("disabled");
+          }
         }
-      } catch (err) {
-        console.error("Error checking lesson status:", err);
+      });
+
+      // Check if all topics are no longer pending
+      if (!stillPending) {
+        console.log("✅ All topics completed. Stopping polling.");
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking generation status:", error);
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
       }
     }
+  }
 
-    // check every 8 seconds
-    const interval = setInterval(checkStatus, 3000);
+  async function checkTopicStatus() {
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch('{% url "profile_topic_status" %}');
+        if (!response.ok) throw new Error("Failed to fetch status");
+
+        const data = await response.json();
+
+        if (data.success) {
+          clearInterval(interval);
+          window.location.reload();
+          return;
+        }
+
+        if (data.error) {
+          clearInterval(interval);
+          window.location.href = "/profile/";
+          return;
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+        clearInterval(interval);
+        sessionStorage.setItem(
+          "errorMessage",
+          "Failed to check status. Please refresh the page."
+        );
+      }
+    }, 3000);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const topicsExist = document.querySelector("[data-topic-id]") !== null;
+
+    if (topicsExist) {
+      console.log("📊 Topics exist. Starting generation status polling...");
+      checkGenerationStatus();
+      pollInterval = setInterval(checkGenerationStatus, 3000);
+    } else {
+      console.log("⏳ No topics yet. Starting topic creation polling...");
+      checkTopicStatus();
+    }
+  });
+
+  window.addEventListener("beforeunload", () => {
+    if (pollInterval) clearInterval(pollInterval);
   });
 </script>
-{% endif %} {% endblock %}
+{% endblock %}

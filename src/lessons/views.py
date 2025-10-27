@@ -26,18 +26,6 @@ def topic_detail_view(request, topic_id):
         'lessons_exist': lessons_exist
     }
     return render(request, 'topic_detail.html', context )
-
-@login_required
-def check_lessons_status(request, topic_id):
-    try:
-        lessons_count = Lesson.objects.filter(topic__id=topic_id).count()
-        print(f'lessons n: {lessons_count}')
-        error = cache.get(f'lessons_for_topic_{topic_id}')
-        if not error and lessons_count != 4:
-            return JsonResponse({'error': 'Lessons not ready'})
-        return JsonResponse({"ready": lessons_count == 4})
-    except Exception as e:
-        return JsonResponse({"error": str(e)})
     
 @login_required
 def lesson_detail_view(request, lesson_id):
@@ -61,11 +49,24 @@ def mark_lesson_completed(request, lesson_id):
             progress.completed = True
             progress.completion_date = timezone.now()
             progress.save()
-            messages.success(request, f"Lesson '{lesson.lesson_title}' marked as complete!")
         else:
             messages.info(request, f"You already completed '{lesson.lesson_title}'")
         
     return redirect('topic_detail', topic_id = lesson.topic.id )
 
+# -- API CALL VIEWS -- 
 
+@login_required
+def check_lessons_status(request, topic_id):
+    try:
+        topic = Topic.objects.get(id = topic_id)
+        lessons_count = Lesson.objects.filter(topic__id=topic_id).count()
+        if lessons_count == 4:
+            topic.status = 'success'
+            topic.save()
+            return JsonResponse({'ready': True})
+        else:
+            return JsonResponse({'ready': False})
+    except Exception as e:
+        return JsonResponse({"error": str(e)})
     

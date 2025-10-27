@@ -1,13 +1,49 @@
 {% extends "base.html" %} {% block title %}Login{% endblock %}
 <!-- leave it -->
-{% block content%}
+{% block content%} {% if not questions_exists %}
+<div class="loader">
+  <div class="spinner"></div>
+  <p>
+    Generating assessment question for {{ questions_data.subject }}. Please
+    wait...
+  </p>
+</div>
+{% else %}
 
 <div class="assessment-container">
-  <h1>Learning style assessment</h1>
+  <h1>Difficulty Assessment</h1>
 
   <form method="post">
     {% csrf_token %} {{ form.as_p }}
     <button type="submit">Submit Assessment</button>
   </form>
 </div>
-{% endblock %}
+{% endif %} {% endblock %}
+<!--  -->
+{% block scripts %} {% if not questions_exists %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Polling JS function
+    async function checkStatus() {
+      try {
+        const response = await fetch(`/api/assessment/status/`);
+        const data = await response.json();
+
+        if (data.ready) {
+          clearInterval(interval);
+          window.location.reload();
+        } else {
+          clearInterval(interval);
+          window.location.href = `/login/?error=ai_error`;
+          return;
+        }
+      } catch (err) {
+        clearInterval(interval);
+        console.error("Error checking lesson status:", err);
+      }
+    }
+
+    const interval = setInterval(checkStatus, 7000);
+  });
+</script>
+{% endif %} {% endblock %}

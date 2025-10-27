@@ -7,8 +7,10 @@ import json
 from dotenv import load_dotenv
 from utils import config
 from django.db import transaction
+from django.contrib import messages
 from learningPlatform.celery import app
 from celery import shared_task
+
 
 load_dotenv()
 
@@ -31,11 +33,6 @@ class CollectionsTopics(BaseModel):
 
 @shared_task
 def generate_topic (subject):
-
-    if Topic.objects.filter(subject = subject).count() == 30:
-         return
-    
-    else:
          
         try:
             with transaction.atomic():
@@ -92,6 +89,7 @@ def generate_topic (subject):
                     for single in topic_data.topics
                 ]
 
+                print(f'#####Saving topics ######')
                 saved_topics = Topic.objects.bulk_create(topics_to_create)
                 print(f'Saved topics: {saved_topics}')
 
@@ -109,9 +107,10 @@ def generate_topic (subject):
                     
                     transaction.on_commit(schedule_tasks)
 
-                return {'success': True, 'topic_data': saved_topics}
+                return {'success': True}
 
         except Exception as e:
-                print(f"❌ Issue with AI topic generator: {type(e).__name__}: {e}")
+                print(f'❌ Issue with AI topic generator: {type(e).__name__}: {e}')
+                messages.info(f'Error {e}, reload the page in few seconds' )
                 return {'success': False}
 

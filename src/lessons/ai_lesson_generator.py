@@ -48,7 +48,7 @@ def generate_lessons_for_topic(topic_id):
     lessons = Lesson.objects.filter(topic_id = topic_id)
 
     if lessons.count() == 4:
-        return
+        return {'successful': True, 'reason': 'Lessons already exist'}
     
     else:
 
@@ -63,27 +63,37 @@ def generate_lessons_for_topic(topic_id):
                             Subject: {topic.subject}
                             Difficulty Level: {topic.difficulty_level}
 
-                            Instructions:
+                            CONTENT GUIDELINES:
                             - Produce lessons that build progressively in difficulty and depth.
                             - Each lesson must have:
                             • A clear and engaging title.
                             • Number lessons sequentially (order: 1, 2, 3, 4)
                             • Ensure logical progression across the 4 lessons
-                            • A single unified content block (can be sub-divided in chapters).
-                            • The content should be detailed, educational, and cohesive.
-                            - Each lesson's content must be at least **1000 words** long.
+                            - Each lesson's content must be between **600-800 words** long.
                             - Content must include:
                             • Clear explanations of key ideas and concepts.
-                            • At least 3 real-world examples relevant to the topic.
-                            • Optional code snippets or applied demonstrations if relevant to the subject.
-                            • Smooth transitions and logical flow suitable for {topic.difficulty_level} learners.
-                            - Use valid Markdown for formatting (headings, lists, bold, italics, code blocks).
-                            - Wrap code in triple backticks ``` with the language name, and do NOT escape newlines or Markdown characters.
-                            - The tone should be clear, engaging, and instructive, as if written by an expert educator.
-                            - Each lesson should take approximately 15–40 minutes to complete.
+                            • At least 2-3 real-world examples relevant to the topic.
+                            • Smooth transitions suitable for {topic.difficulty_level} learners.
+                            - Each lesson should take approximately 20–40 minutes to complete.
 
-                            Provide clear, engaging content that works for different learning preferences.
-                            Return the data strictly in JSON format matching this structure:
+                            FORMATTING RULES:
+                            - Use Markdown formatting: # headers, **bold**, *italic*, lists, etc.
+                            - For code blocks, use triple backticks with language: ```python
+                            - Use bullet points with - or * for lists
+                            - Use numbered lists with 1. 2. 3.
+                            
+                            CRITICAL - JSON ESCAPE RULES (VERY IMPORTANT):
+                            - Do NOT use single backslashes (\\) anywhere in the content
+                            - Property name must be enclosed in double quotes
+                            - For line breaks in content, use actual newlines, not \\n escape sequences
+                            - For tabs, use actual spaces, not \\t
+                            - Never use regex patterns or escape sequences like \\d \\w \\s in examples
+                            - If discussing backslashes, write them as "backslash character" in words
+                            - Avoid any LaTeX or mathematical notation with backslashes
+                            - Do not include file paths with backslashes (use forward slashes if needed)
+                            - The content should be plain text with Markdown, no special escape sequences
+                        
+                        Return complete JSON with all 4 lessons.
 
                             LessonCollection = {{
                             "subject": "{topic.subject}",
@@ -91,12 +101,13 @@ def generate_lessons_for_topic(topic_id):
                                 {{
                                 "lesson_title": "<string>",
                                 "order": <1-4>,
-                                "content": "<Markdown-formatted string, at least 1000 words>",
+                                "content": "<Markdown-formatted string, between 600 and 800 words>",
                                 "estimated_duration": <integer between 10 and 50>
                                 }},
                                 ...
                             ]
                             }}
+                            CRITICAL: Ensure complete JSON. Do not truncate.
                             """
                 response = client.chat.completions.create(
                 model=config.MODEL,
@@ -111,7 +122,8 @@ def generate_lessons_for_topic(topic_id):
                             "schema": LessonCollection.model_json_schema()
                         }
                     },
-                    temperature=0.7
+                    temperature=0.7,
+                    max_tokens=10000
                 )
                 raw_content = response.choices[0].message.content
                 lessons_data = LessonCollection.model_validate(json.loads(raw_content))
@@ -134,24 +146,56 @@ def generate_lessons_for_topic(topic_id):
                 ]
 
                 Lesson.objects.bulk_create(lesson_objects)
-                return {'successful': True}
+                return {'successful': True, 'reason': 'Lessons created successfuly'}
 
         except Exception as e:
             print(f"❌ Issue with AI lesson generator: {type(e).__name__}: {e}")
-            cache.set(f'lessons_for_topic_{topic_id}', False, 9)
             return {'successful': False, 'reason': str(e)}
     
 
 
-@shared_task (bind=True, max_retries=3, default_retry_delay=240)
+@shared_task(bind=True, max_retries=1, default_retry_delay=5)
 def generate_lessons_task(self, topic_id):
-    result = generate_lessons_for_topic(topic_id)
-    if not result ['successful']:
-        reason = result.get('reason', 'Unknown failure')
-        print(f"❌ Task failed for topic {topic_id}: {reason}")
-        raise self.retry(exc=Exception(reason))
+    try:
+        topic = Topic.objects.get(id=topic_id)
 
-    print(f"✅ Lessons successfully generated for topic {topic_id}")
-    return result
+        if topic.status != 'pending':
+            topic.status = 'pending'
+            topic.save()
+        
+        result = generate_lessons_for_topic(topic_id)
+
+        if result is None:
+            print(f"❌ generate_lessons_for_topic returned None for topic {topic_id}")
+        
+        if not result['successful']:
+            reason = result.get('reason', 'Unknown failure')
+            print(f"❌ Task failed for topic {topic_id}: {reason}")
+            
+            # Check if this is the last retry
+            if self.request.retries >= self.max_retries:
+                topic.status = 'failed'
+                topic.save()
+                print(f'🔴 Topic {topic_id} marked as FAILED after all retries')
+                return {'successful': False, 'reason': reason}
+            
+            # Still have retries, raise to retry
+            raise self.retry(exc=Exception(reason))
+        
+        # Success!
+        topic.status = 'success'
+        topic.save()
+        print(f"✅ Lessons successfully generated for topic {topic_id}")
+        return result
+    
+    except Exception as e:
+        topic = Topic.objects.get(id=topic_id)
+        
+        if self.request.retries >= self.max_retries:
+            topic.status = 'failed'
+            topic.save()
+            print(f"🔴 Topic {topic_id} marked as FAILED due to exception: {str(e)}")
+        
+        raise
 
 

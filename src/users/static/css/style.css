@@ -54,12 +54,7 @@ h1 {
     padding-bottom: 8px;
 }
 
-.topiclist-container h1 {
-    margin: 0 0 10px;
-    font-size: 28px;
-    color: var(--text-color);
-}
-
+.topiclist-container h1,
 .topicdetail-container h1,
 .lessondetail-container h1 {
     margin: 0 0 10px;
@@ -79,7 +74,6 @@ body.topic-detail-container-body .content {
     margin: 0 auto;
     padding: 2rem;
     border-radius: 12px;
-
 }
 
 a {
@@ -87,12 +81,6 @@ a {
     text-decoration: none;
 }
 
-.back-link {
-    display: inline-block;
-    margin-bottom: 20px;
-    color: var(--primary-color);
-    font-weight: 500;
-}
 
 .loader {
     display: flex;
@@ -110,11 +98,49 @@ a {
     height: 48px;
     border: 4px solid #ccc;
     border-top: 4px solid #4f46e5;
-    /* Tailwind indigo-600 style */
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 16px;
 }
+
+.topic-status-pending,
+.topic-status-failed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 8px 12px;
+    background: #fff3e0;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #e65100;
+}
+
+.topic-status-success {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--primary-hover);
+}
+
+.generating-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ff9800;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spinner-text,
+.status-text {
+    font-weight: 500;
+}
+
 
 /* Homepage */
 
@@ -175,25 +201,6 @@ a {
     font-weight: 500;
 }
 
-.cta-button {
-    display: inline-block;
-    background-color: #2ecc71;
-    color: white;
-    padding: 16px 60px;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-}
-
-.cta-button:hover {
-    background-color: #27ae60;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
-}
-
 
 /* Containers */
 
@@ -204,7 +211,6 @@ a {
     width: 100%;
     min-width: 400px;
     margin: auto;
-    /* margin adjusts automatically for mobile */
     padding: 40px 35px;
     border-radius: 16px;
     box-shadow: var(--shadow);
@@ -237,15 +243,10 @@ a {
     padding: 0 20px;
 }
 
-.lessondetail-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px 20px;
-}
-
+.lessondetail-container,
 .topiclist-container,
 .topicdetail-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 40px 20px;
 }
@@ -542,10 +543,6 @@ input[type="password"]:focus {
 
 }
 
-.topic-card.all-lessons {
-    border: 1px solid rgba(60, 179, 113, 0.6);
-}
-
 .lesson-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
@@ -784,8 +781,27 @@ button:active {
     background: var(--primary-hover);
 }
 
+.cta-button {
+    display: inline-block;
+    background-color: #2ecc71;
+    color: white;
+    padding: 16px 60px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.cta-button:hover {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
 
 /* Signup link */
+
 .signup-link {
     text-align: center;
     margin-top: 25px;
@@ -800,6 +816,13 @@ button:active {
 
 .signup-link a:hover {
     text-decoration: underline;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    font-weight: 500;
 }
 
 /* NAVBAR */
@@ -860,7 +883,11 @@ button:active {
 
 /* Responsive adjustments */
 @media (max-width: 900px) {
-    .profile-container {
+
+    .login-container,
+    .signup-container,
+    .profile-container,
+    .assessment-container {
         flex-direction: column;
     }
 
@@ -873,8 +900,11 @@ button:active {
 
     .login-container,
     .signup-container,
+    .profile-container,
     .assessment-container {
+        flex-direction: column;
         padding: 35px 25px;
+
     }
 
     h1 {
@@ -899,17 +929,13 @@ button:active {
 }
 
 
-@media (max-width: 700px) {
-    .navbar-links {
-        display: none;
-    }
-}
-
 @media (max-width: 480px) {
 
     .login-container,
     .signup-container,
+    .profile-container,
     .assessment-container {
+        flex-direction: column;
         margin: 20px;
         padding: 30px 20px;
     }

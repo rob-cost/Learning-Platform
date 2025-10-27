@@ -26,11 +26,18 @@ DIFFICULTY_CHOICES = [
         ('advanced', 'Advanced')
     ]
 
+STATUS_CHOICES = [
+    ('success', 'Success'),
+    ('pending', 'Pending'),
+    ('failed', 'Failed')
+]
+
 class Topic (models.Model):
     subject = models.CharField(max_length= 50, choices=SUBJECT_CHOICES)
     difficulty_level = models.CharField(max_length=50, choices=DIFFICULTY_CHOICES)
     topic_name = models.CharField(max_length=100)
     description = models.TextField()
+    status = models.CharField(max_length=50, default='pending', choices=STATUS_CHOICES)
     order = models.IntegerField(help_text='Order within the difficulty level')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -43,6 +50,7 @@ class Topic (models.Model):
         
 
 class Lesson (models.Model):
+    
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='lessons')
     lesson_title = models.CharField(max_length=200)
     lesson_content = models.JSONField(help_text="AI-generated lesson content based on skills")
@@ -50,6 +58,8 @@ class Lesson (models.Model):
     estimated_duration = models.IntegerField(default=30, help_text="Estimated minutes to complete")
     created_at = models.DateTimeField(auto_now_add=True)
     
+
+
     class Meta: 
         ordering = ['topic', 'order']
         unique_together = ['topic', 'order']

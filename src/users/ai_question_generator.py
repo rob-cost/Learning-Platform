@@ -4,6 +4,7 @@ from typing import Literal, List
 import json
 from .models import DifficultyQuestions
 from utils import config
+from celery import shared_task
 
 from dotenv import load_dotenv
 
@@ -15,7 +16,7 @@ class AssessmentQuestion(BaseModel):
     question: str
     answer: List[str]
     correct_answer: int
-    difficulty_level: Literal['begginer', 'intermediate', 'advanced']
+    difficulty_level: Literal['beginner', 'intermediate', 'advanced']
     points: int
 
 class AssessmentQuestions(BaseModel):
@@ -24,6 +25,7 @@ class AssessmentQuestions(BaseModel):
 
 
 # PROBLEM: QUESTIONS ARE REGENERATED IN RETAKE ASSESSMENT AT EVERY PAGE RELOAD
+@shared_task
 def generate_difficulty_questions(subject, is_retake = False):
     
     existing_questions = DifficultyQuestions.objects.filter(subject = subject)
@@ -52,7 +54,7 @@ def generate_difficulty_questions(subject, is_retake = False):
         
         Requirements:
         - Total: 10 questions
-        - Difficulty distribution: 4 beginner (2 points each), 4 intermediate (3 points each), 2 advanced (4 points each)
+        - Difficulty distribution: 4 beginner (1 points each), 4 intermediate (2 points each), 2 advanced (4 points each)
         - Each question must have exactly 4 answer options
         - Questions should progressively test understanding from basic to advanced concepts
         - Ensure questions are clear, unambiguous, and have one definitively correct answer"""
