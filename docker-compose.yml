@@ -1,13 +1,36 @@
+version: "3.9"
+
 services:
-  app:
+  web:
     build:
       context: .
+      target: prod
+    container_name: learning-platform-web
+    command: >
+      gunicorn learningPlatform.asgi:application
+      -w 3
+      -k uvicorn.workers.UvicornWorker
+      --bind 0.0.0.0:8080
     ports:
-      - 8000:8000
-    volumes:
-      - ./src:/app/src
-      - ./static:/static
-    command: uv run python manage.py runserver 0.0.0.0:8000
-    environment:
-      - GROQ_API_KEY=${GROQ_API_KEY}
-      - DEBUG=1
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - celery
+    networks:
+      - learning-net
+
+  celery:
+    build:
+      context: .
+      target: prod
+    container_name: learning-platform-celery
+    command: celery -A learningPlatform worker --loglevel=info
+    env_file:
+      - .env
+    networks:
+      - learning-net
+
+networks:
+  learning-net:
+    driver: bridge

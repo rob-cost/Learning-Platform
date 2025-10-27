@@ -67,7 +67,3 @@ RUN python manage.py collectstatic --noinput
 # CMD for Django HTTP service:
 CMD ["gunicorn", "learningPlatform.asgi:application", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080"]
 
-# ------------------------
-# CMD for Celery worker with dummy HTTP server:
-#  CMD bash -c "python -m http.server \$PORT & exec celery -A learningPlatform worker --loglevel=info"
-# ------------------------
