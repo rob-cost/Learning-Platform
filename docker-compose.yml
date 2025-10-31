@@ -31,6 +31,15 @@ services:
     networks:
       - learning-net
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: learning-platform-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - learning-net
+
 networks:
   learning-net:
     driver: bridge
