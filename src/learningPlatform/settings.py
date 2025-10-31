@@ -66,7 +66,8 @@ ROOT_URLCONF = 'learningPlatform.urls'
 LOGIN_REDIRECT_URL = 'landing'
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://learning-platform-121499874327.europe-west3.run.app"
+    "https://learning-platform-121499874327.europe-west3.run.app",
+    "https://ailmspro.roberto-costantino.com"
 ]
 
 TEMPLATES = [
