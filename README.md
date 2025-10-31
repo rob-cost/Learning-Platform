@@ -1,49 +1,134 @@
-# Personalized Learning Platform
+# AI Learning Platform
 
-An AI-powered adaptive learning platform built with Django that personalizes educational content based on individual learning styles and knowledge levels.
+An intelligent, adaptive learning platform that generates personalized educational content using Large Language Models (LLMs). The platform assesses user proficiency and creates customized learning paths tailored to individual skill levels.
 
-## 🎯 Overview
+## Features
 
-This platform creates customized learning experiences by:
+### 🎯 Adaptive Learning
 
-- Assessing users' learning preferences (visual, hands-on, reading)
-- Evaluating knowledge levels through AI-generated assessments
-- Generating personalized learning paths with multi-modal content
-- Adapting content presentation based on individual learning styles
+- **Difficulty Assessment**: Initial quiz to determine user's proficiency level
+- **Personalized Learning Paths**: Three difficulty levels (Beginner, Intermediate, Advanced)
+- **Structured Curriculum**: 10 topics per difficulty level, 4 lessons per topic (40 lessons total per level)
+- **Progress Tracking**: Mark lessons as complete and track advancement through the curriculum
 
-## ✨ Key Features
+### 🤖 AI-Powered Content Generation
 
-### Intelligent Assessment System
+- Dynamic content creation using LLM technology (powered by Groq)
+- Asynchronous content generation for optimal performance
+- Subject-specific learning materials tailored to difficulty level
 
-- **Learning Style Assessment**: questions evaluation to determine visual, hands-on, and reading preferences
-- **Subject Selection**: Choose from Programming, Music, or Art
-- **AI-Generated Difficulty Testing**: Dynamic questions created by Groq AI to assess knowledge level (beginner/intermediate/advanced)
+### 📈 Progression System
 
-### Personalized Learning Paths
+- Advance to next difficulty level upon completing all topics
+- Retake assessment quiz option (unlocked at 80% completion)
+- Validate learning and ensure readiness for next level
 
-- **Topic Generation**: AI creates comprehensive learning roadmaps for all difficulty levels
-- **Multi-Modal Lessons**: Each lesson includes visual, hands-on, and reading content
-- **Adaptive Content Display**: Emphasizes content types matching user's learning preferences
-- **On-Demand Generation**: Lessons created when needed to optimize resource usage
+## Tech Stack
 
-### Progress Tracking
+### Backend
 
-- Complete registration flow with step validation
-- Learning progress monitoring
-- User profiles displaying assessment results and preferences
-
-## 🛠️ Technology Stack
-
-- **Backend**: Django 5.0+
-- **Database**: SQLite (development) / PostgreSQL (production-ready)
-- **AI Integration**: Groq API
+- **Framework**: Django
+- **Language**: Python
 - **Data Validation**: Pydantic
-- **Authentication**: Django built-in auth system
+- **Database**: PostgreSQL
+- **Task Queue**: Celery
+- **Message Broker**: Redis
+- **LLM Integration**: Groq library
 
-## 📋 Prerequisites
+### Infrastructure
 
-- Python 3.11+
-- Groq API key (free tier available)
-- pip or uv for package management
+- **Hosting**: Google Cloud Platform (VM)
+- **CI/CD**: GitHub Actions
+- **Deployment**: Automated deployment pipeline
 
-## 🚀 Installation
+## Installation
+
+### Prerequisites
+
+- Python 3.8+
+- PostgreSQL
+- Redis
+- Google Cloud Platform account (for deployment)
+
+## Usage
+
+### User Flow
+
+1. **Subject Selection**: Choose a subject to learn
+2. **Assessment Quiz**: Complete initial difficulty assessment
+3. **Learning Path Generation**: System generates personalized 10-topic curriculum
+4. **Learn**: Progress through 4 lessons per topic
+5. **Complete**: Mark lessons as complete to track progress
+6. **Advance**: Complete all topics to unlock next difficulty level
+7. **Reassess**: Retake quiz at 80% completion to validate advancement
+
+### Local Setup
+
+1. **Clone the repository**
+
+```bash
+git clone <repository-url>
+cd learning-platform
+```
+
+2. **Create virtual environment**
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+4. **Configure environment variables**
+   Create a `.env` file in the project root:
+
+```env
+SECRET_KEY=your-django-secret-key
+DEBUG=True
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+REDIS_URL=redis://localhost:6379/0
+GROQ_API_KEY=your-groq-api-key
+```
+
+5. **Run migrations**
+
+```bash
+python manage.py migrate
+```
+
+6. **Start Redis server**
+
+```bash
+redis-server
+```
+
+7. **Start Celery worker**
+
+```bash
+celery -A project_name worker --loglevel=info
+```
+
+8. **Run development server**
+
+```bash
+python manage.py runserver
+```
+
+## Deployment
+
+### Google Cloud Platform
+
+The application is deployed on GCP using a Virtual Machine instance with automated deployment via GitHub Actions.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
