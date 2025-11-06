@@ -27,8 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bqzl!-a1#7$x$4k5o!nb2085fe)i77*xb)@(rq(%+ux#io!3=('
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Use it like that for deployment
+# DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = True
 
 #AUTH
 LOGIN_URL='/login/'
