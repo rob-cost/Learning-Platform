@@ -8,8 +8,6 @@ from utils import config
 import markdown2
 from django.db import transaction
 from celery import shared_task
-import asyncio
-from django.core.cache import cache
 
 
 load_dotenv()
@@ -22,42 +20,45 @@ class SingleLesson(BaseModel):
     order: int
     content: str
     estimated_duration: int
- 
+
+
 class LessonCollection(BaseModel):
     subject: str
     lessons: List[SingleLesson]
 
+
 def markdown_to_html(md_text: str) -> str:
     return markdown2.markdown(
-         md_text, extras=[
-            "fenced-code-blocks",   # Properly render ```python ... ```
-            "tables",               # Render markdown tables
-            "strike",               # Support ~~strikethrough~~
-            "task_list",            # Render task lists [x]
-            "code-friendly",        # Don’t mess with inline code
-            "break-on-newline",     # Handle single newlines gracefully
-            "cuddled-lists",        # Avoid gaps between lists
-        ]
-    ) 
+        md_text,
+        extras=[
+            "fenced-code-blocks",  # Properly render ```python ... ```
+            "tables",  # Render markdown tables
+            "strike",  # Support ~~strikethrough~~
+            "task_list",  # Render task lists [x]
+            "code-friendly",  # Don’t mess with inline code
+            "break-on-newline",  # Handle single newlines gracefully
+            "cuddled-lists",  # Avoid gaps between lists
+        ],
+    )
 
 
 def generate_lessons_for_topic(topic_id):
 
-    # problem: more user can access the same topic 
-    topic = Topic.objects.get(id = topic_id)
-    lessons = Lesson.objects.filter(topic_id = topic_id)
+    # problem: more user can access the same topic
+    topic = Topic.objects.get(id=topic_id)
+    lessons = Lesson.objects.filter(topic_id=topic_id)
 
     if lessons.count() == 4:
-        return {'successful': True, 'reason': 'Lessons already exist'}
-    
+        return {"successful": True, "reason": "Lessons already exist"}
+
     else:
 
         try:
-            
+
             with transaction.atomic():
 
-                Lesson.objects.filter(topic = topic_id).delete()
-                
+                Lesson.objects.filter(topic=topic_id).delete()
+
                 prompt = f"""Create 4 comprehensive lessons for the topic: "{topic.topic_name}" 
                 
                             Subject: {topic.subject}
@@ -110,20 +111,23 @@ def generate_lessons_for_topic(topic_id):
                             CRITICAL: Ensure complete JSON. Do not truncate.
                             """
                 response = client.chat.completions.create(
-                model=config.MODEL,
+                    model=config.MODEL,
                     messages=[
-                        {"role": "system", "content": "You are an expert educational content creator who designs multi-modal learning experiences."},
-                        {"role": "user", "content": prompt}
+                        {
+                            "role": "system",
+                            "content": "You are an expert educational content creator who designs multi-modal learning experiences.",
+                        },
+                        {"role": "user", "content": prompt},
                     ],
                     response_format={
                         "type": "json_schema",
                         "json_schema": {
                             "name": "lesson_collection",
-                            "schema": LessonCollection.model_json_schema()
-                        }
+                            "schema": LessonCollection.model_json_schema(),
+                        },
                     },
                     temperature=0.7,
-                    max_tokens=10000
+                    max_tokens=10000,
                 )
                 raw_content = response.choices[0].message.content
                 lessons_data = LessonCollection.model_validate(json.loads(raw_content))
@@ -131,27 +135,28 @@ def generate_lessons_for_topic(topic_id):
                 lessons = lessons_data.lessons
 
                 if len(lessons) != 4:
-                    return {'successful': False, 'reason': f'Expected 4 lessons, got {len(lessons)}'}
+                    return {
+                        "successful": False,
+                        "reason": f"Expected 4 lessons, got {len(lessons)}",
+                    }
 
-            
                 lesson_objects = [
                     Lesson(
                         topic=topic,
                         lesson_title=lesson.lesson_title,
                         order=lesson.order,
                         estimated_duration=lesson.estimated_duration,
-                        lesson_content=markdown_to_html(lesson.content)
+                        lesson_content=markdown_to_html(lesson.content),
                     )
                     for lesson in lessons
                 ]
 
                 Lesson.objects.bulk_create(lesson_objects)
-                return {'successful': True, 'reason': 'Lessons created successfuly'}
+                return {"successful": True, "reason": "Lessons created successfuly"}
 
         except Exception as e:
             print(f"❌ Issue with AI lesson generator: {type(e).__name__}: {e}")
-            return {'successful': False, 'reason': str(e)}
-    
+            return {"successful": False, "reason": str(e)}
 
 
 @shared_task(bind=True, max_retries=1, default_retry_delay=5)
@@ -159,43 +164,41 @@ def generate_lessons_task(self, topic_id):
     try:
         topic = Topic.objects.get(id=topic_id)
 
-        if topic.status != 'pending':
-            topic.status = 'pending'
+        if topic.status != "pending":
+            topic.status = "pending"
             topic.save()
-        
+
         result = generate_lessons_for_topic(topic_id)
 
         if result is None:
             print(f"❌ generate_lessons_for_topic returned None for topic {topic_id}")
-        
-        if not result['successful']:
-            reason = result.get('reason', 'Unknown failure')
+
+        if not result["successful"]:
+            reason = result.get("reason", "Unknown failure")
             print(f"❌ Task failed for topic {topic_id}: {reason}")
-            
+
             # Check if this is the last retry
             if self.request.retries >= self.max_retries:
-                topic.status = 'failed'
+                topic.status = "failed"
                 topic.save()
-                print(f'🔴 Topic {topic_id} marked as FAILED after all retries')
-                return {'successful': False, 'reason': reason}
-            
+                print(f"🔴 Topic {topic_id} marked as FAILED after all retries")
+                return {"successful": False, "reason": reason}
+
             # Still have retries, raise to retry
             raise self.retry(exc=Exception(reason))
-        
+
         # Success!
-        topic.status = 'success'
+        topic.status = "success"
         topic.save()
         print(f"✅ Lessons successfully generated for topic {topic_id}")
         return result
-    
+
     except Exception as e:
         topic = Topic.objects.get(id=topic_id)
-        
+
         if self.request.retries >= self.max_retries:
-            topic.status = 'failed'
+            topic.status = "failed"
             topic.save()
             print(f"🔴 Topic {topic_id} marked as FAILED due to exception: {str(e)}")
-        
+
         raise
-
-
