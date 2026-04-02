@@ -75,7 +75,7 @@ def generate_lessons_for_topic(topic_id):
                             • Clear explanations of key ideas and concepts.
                             • At least 2-3 real-world examples relevant to the topic.
                             • Smooth transitions suitable for {topic.difficulty_level} learners.
-                            - Each lesson should take approximately 20–40 minutes to complete.
+                            - Each lesson should take approximately 20 minutes to complete.
 
                             FORMATTING RULES:
                             - Use Markdown formatting: # headers, **bold**, *italic*, lists, etc.
@@ -127,7 +127,7 @@ def generate_lessons_for_topic(topic_id):
                         },
                     },
                     temperature=0.7,
-                    max_tokens=10000,
+                    max_tokens=20000,
                 )
                 raw_content = response.choices[0].message.content
                 lessons_data = LessonCollection.model_validate(json.loads(raw_content))
