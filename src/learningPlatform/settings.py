@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +31,7 @@ SECRET_KEY = "django-insecure-bqzl!-a1#7$x$4k5o!nb2085fe)i77*xb)@(rq(%+ux#io!3=(
 # Use it like that for deployment
 # DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 
-DEBUG = False
+DEBUG = True
 
 # AUTH
 LOGIN_URL = "/login/"
@@ -160,6 +161,9 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "users" / "static",
 ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -14,19 +14,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, reverse_lazy, include
+from django.urls import path, include
 from users.views import CustomPasswordChangeView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path("admin/", admin.site.urls),
     path(
-        'password_change/',
-        CustomPasswordChangeView.as_view(), 
-        name='password_change'
+        "login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"
     ),
-    path('', include('users.urls')),
-    path('', include('lessons.urls')),
+    path(
+        "password_change/", CustomPasswordChangeView.as_view(), name="password_change"
+    ),
+    path("", include("users.urls")),
+    path("", include("lessons.urls")),
 ]
